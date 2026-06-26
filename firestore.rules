@@ -1,0 +1,155 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net - Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- REUSABLE HELPER PRIMITIVES ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isSignedIn() && (
+        request.auth.token.email_verified == true || 
+        (request.auth.token.email != null && request.auth.token.email.lower() == 'carlosrs.email@gmail.com')
+      );
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        (request.auth.token.email != null && request.auth.token.email.lower() == 'carlosrs.email@gmail.com') ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true)
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- COLLECTION MATCHES ---
+
+    // 1. Users Collection
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      
+      allow create: if isSignedIn() && isOwner(userId) && 
+        incoming().keys().hasAll(['uid', 'email', 'displayName', 'likedSongs', 'likedPlaylists', 'isAdmin', 'createdAt']) &&
+        incoming().keys().size() == 7 &&
+        incoming().uid == userId &&
+        incoming().email is string &&
+        incoming().displayName is string &&
+        incoming().likedSongs is list &&
+        incoming().likedPlaylists is list &&
+        (incoming().isAdmin == false || (request.auth.token.email != null && request.auth.token.email.lower() == 'carlosrs.email@gmail.com')) && // Prevent unauthorized self-promotions
+        incoming().createdAt is string;
+
+      allow update: if isSignedIn() && isOwner(userId) &&
+        (!('uid' in incoming()) || incoming().uid == existing().uid) &&
+        (!('email' in incoming()) || incoming().email == existing().email) &&
+        (!('likedSongs' in incoming()) || incoming().likedSongs is list) &&
+        (!('likedPlaylists' in incoming()) || incoming().likedPlaylists is list) &&
+        (!('isAdmin' in incoming()) || incoming().isAdmin == existing().isAdmin || isAdmin());
+
+      allow delete: if isAdmin();
+    }
+
+    // 2. Songs Collection
+    match /songs/{songId} {
+      allow read: if true; // Catalogue is public
+
+      allow create: if isAdmin() &&
+        incoming().keys().hasAll(['id', 'name', 'artist', 'album', 'genre', 'year', 'coverUrl', 'audioUrl', 'lyrics', 'plays', 'createdAt']) &&
+        incoming().keys().size() >= 11 && incoming().keys().size() <= 13 &&
+        (!('secondGenre' in incoming()) || (incoming().secondGenre is string && incoming().secondGenre.size() <= 200)) &&
+        (!('candidateArtists' in incoming()) || incoming().candidateArtists is list) &&
+        incoming().id == songId &&
+        incoming().name is string && incoming().name.size() <= 200 &&
+        incoming().artist is string &&
+        incoming().album is string &&
+        incoming().genre is string &&
+        incoming().year is number &&
+        incoming().coverUrl is string &&
+        incoming().audioUrl is string &&
+        incoming().lyrics is string && incoming().lyrics.size() <= 50000 &&
+        incoming().plays is number &&
+        incoming().createdAt is string;
+
+      allow update: if isAdmin() || (
+        // Allow public to increment only 'plays' (anonymous/signed-in listens)
+        incoming().diff(existing()).affectedKeys().hasOnly(['plays']) &&
+        incoming().plays == existing().plays + 1
+      ) || (
+        // Allow public to cast votes on candidateArtists list
+        incoming().diff(existing()).affectedKeys().hasOnly(['candidateArtists']) &&
+        incoming().candidateArtists is list
+      );
+
+      allow delete: if isAdmin();
+    }
+
+    // 3. Playlists Collection
+    match /playlists/{playlistId} {
+      allow read: if true; // Playlists are visible to guests and users
+
+      allow create: if isSignedIn() && (
+        incoming().createdBy == request.auth.uid || isAdmin()
+      ) &&
+      incoming().keys().hasAll(['id', 'name', 'description', 'coverUrl', 'songIds', 'createdBy', 'createdAt']) &&
+      incoming().keys().size() == 7 &&
+      incoming().id == playlistId &&
+      incoming().name is string && incoming().name.size() <= 100 &&
+      incoming().songIds is list &&
+      incoming().createdBy == request.auth.uid &&
+      incoming().createdAt is string;
+
+      allow update: if isSignedIn() && (
+        existing().createdBy == request.auth.uid || isAdmin()
+      ) &&
+      incoming().id == existing().id &&
+      incoming().createdBy == existing().createdBy &&
+      incoming().createdAt == existing().createdAt &&
+      incoming().songIds is list;
+
+      allow delete: if isSignedIn() && (
+        existing().createdBy == request.auth.uid || isAdmin()
+      );
+    }
+
+    // 4. Licensing Requests Collection
+    match /licensing_requests/{requestId} {
+      allow read: if isAdmin(); // Only admins can inspect submissions
+
+      allow create: if 
+        incoming().id == requestId &&
+        incoming().fullName is string && incoming().fullName.size() <= 200 &&
+        incoming().status == 'Novo' &&
+        incoming().createdAt is string;
+
+      allow update: if isAdmin() || (
+        // Allow updating status to Pago with approvedAt timestamp when payment is successfully confirmed
+        incoming().id == existing().id &&
+        incoming().status == 'Pago' &&
+        incoming().approvedAt is string
+      );
+
+      allow delete: if isAdmin();
+    }
+  }
+}

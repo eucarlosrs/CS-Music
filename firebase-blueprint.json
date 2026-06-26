@@ -1,0 +1,92 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with favorites, play history, and admin flag.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Unique identifier for the user" },
+        "email": { "type": "string", "description": "User email address" },
+        "displayName": { "type": "string", "description": "User profile display name" },
+        "likedSongs": { "type": "array", "description": "List of song IDs favorited by the user" },
+        "likedPlaylists": { "type": "array", "description": "List of playlist IDs favorited by the user" },
+        "isAdmin": { "type": "boolean", "description": "Determines if the user has administrative privileges" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Database registration timestamp" }
+      },
+      "required": ["uid", "email"]
+    },
+    "Song": {
+      "title": "Song",
+      "description": "Represents a single track available on CS Music.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique track ID" },
+        "name": { "type": "string", "description": "Song title" },
+        "artist": { "type": "string", "description": "Artist (typically CS Estúdio)" },
+        "album": { "type": "string", "description": "Album title" },
+        "genre": { "type": "string", "description": "Musical genre" },
+        "secondGenre": { "type": "string", "description": "Optional secondary/hybrid genre" },
+        "year": { "type": "number", "description": "Release year" },
+        "coverUrl": { "type": "string", "description": "URL of the song cover image" },
+        "audioUrl": { "type": "string", "description": "URL of the audio MP3 file" },
+        "lyrics": { "type": "string", "description": "Lyrics text of the song" },
+        "plays": { "type": "number", "description": "Global play count of this song" },
+        "candidateArtists": { "type": "array", "description": "Optional list of 4 candidate artists with name and vote count" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "artist", "audioUrl"]
+    },
+    "Playlist": {
+      "title": "Playlist",
+      "description": "A collection of songs created by users or the system.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique playlist ID" },
+        "name": { "type": "string", "description": "Playlist name" },
+        "description": { "type": "string", "description": "Brief description of the playlist" },
+        "coverUrl": { "type": "string", "description": "Cover art URL for the playlist" },
+        "songIds": { "type": "array", "description": "An array of Song ID references" },
+        "createdBy": { "type": "string", "description": "User UID who created the playlist" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "songIds", "createdBy"]
+    },
+    "LicensingRequest": {
+      "title": "LicensingRequest",
+      "description": "Form submission requesting commercial rights or acquisition for a track.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique licensing request ID" },
+        "fullName": { "type": "string", "description": "Name of the person requesting licensing" },
+        "email": { "type": "string", "description": "Email of the requester" },
+        "phone": { "type": "string", "description": "Phone number of the requester" },
+        "company": { "type": "string", "description": "Institution name (optional)" },
+        "songId": { "type": "string", "description": "The target Song ID" },
+        "songName": { "type": "string", "description": "Name of the song" },
+        "purpose": { "type": "string", "description": "Proposed intent of use for the music" },
+        "message": { "type": "string", "description": "Additional notes or description" },
+        "status": { "type": "string", "enum": ["Novo", "Em andamento", "Fechado"], "description": "Current status of the request" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "fullName", "email", "phone", "songId", "songName", "purpose", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User metadata master records"
+    },
+    "/songs/{songId}": {
+      "schema": "Song",
+      "description": "Entire song catalogue of CS Estúdio"
+    },
+    "/playlists/{playlistId}": {
+      "schema": "Playlist",
+      "description": "System and user-defined playlists"
+    },
+    "/licensing_requests/{requestId}": {
+      "schema": "LicensingRequest",
+      "description": "Commercial licensing application records"
+    }
+  }
+}
