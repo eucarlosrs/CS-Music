@@ -15,7 +15,8 @@ import {
   Unlock,
   Clock,
   Sparkles,
-  AlertCircle
+  AlertCircle,
+  Heart
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -28,7 +29,7 @@ export const LicensingModal: React.FC<LicensingModalProps> = ({ song, onClose })
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [cpf, setCpf] = useState('');
-  const [offerValue, setOfferValue] = useState('30');
+  const [offerValue, setOfferValue] = useState('20');
   const [message, setMessage] = useState('');
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -154,20 +155,21 @@ export const LicensingModal: React.FC<LicensingModalProps> = ({ song, onClose })
   const triggerWhatsApp = (value: number) => {
     if (paymentStatus !== 'approved') return;
 
-    const paymentInfo = `✅ PAGAMENTO INTEGRADO & APROVADO\n- Mercado Pago ID: ${paymentId}\n- Tipo: Pix Automático ${isSandboxPayment ? '(Simulado)' : ''}`;
+    const paymentInfo = `✅ CONTRIBUIÇÃO SOLIDÁRIA REGISTRADA & APROVADA\n- Mercado Pago ID: ${paymentId}\n- Tipo: Pix Automático ${isSandboxPayment ? '(Simulado)' : ''}`;
 
     const textMsg = 
       `Olá Carlos! 👋\n` +
-      `Acabei de adquirir a licença comercial da música *${song.name}* no *CS Music*!\n\n` +
-      `*Comprovante de Pagamento:* \n${paymentInfo}\n\n` +
+      `Acabei de fazer uma contribuição solidária para o projeto *CS do Bem* no valor de *R$ ${value.toFixed(2)}* para ajudar pessoas necessitadas em situações vulneráveis e de rua!\n\n` +
+      `Como forma de agradecimento, selecionei a trilha *${song.name}* para licenciar no *CS Music*! ❤️\n\n` +
+      `*Comprovante de Contribuição:* \n${paymentInfo}\n\n` +
       `*Dados do Licenciado:*\n` +
       `- *Nome Completo:* ${fullName}\n` +
       `- *CPF:* ${cpf}\n` +
-      `- *WhatsApp para Contato:* ${phone}\n` +
-      `- *Trilha Comercial:* ${song.name}\n` +
-      `- *Valor Pago:* R$ ${value.toFixed(2)}\n` +
-      `${message ? `- *Mensagem / Detalhes:* "${message}"\n` : ''}\n` +
-      `O pagamento já foi validado pelo Mercado Pago. Fico no aguardo do envio do contrato de cessão e dos arquivos de áudio originais em alta definição (WAV + MP3)! 🚀`;
+      `- *WhatsApp de Contato:* ${phone}\n` +
+      `- *Trilha Escolhida:* ${song.name}\n` +
+      `${message ? `- *Mensagem para o Projeto:* "${message}"\n` : ''}\n` +
+      `O pagamento já foi validado pelo Mercado Pago. Fico no aguardo do envio dos arquivos originais em alta definição (WAV + MP3) e do contrato de Licença CS Indeterminada (vitalícia e não exclusiva) para o meu uso! 🚀\n\n` +
+      `Que Deus abençoe grandemente o projeto CS do Bem! 🙏`;
 
     const waUrl = `https://api.whatsapp.com/send?phone=${MY_WHATSAPP_NUMBER}&text=${encodeURIComponent(textMsg)}`;
     window.open(waUrl, '_blank', 'noopener,noreferrer');
@@ -181,8 +183,8 @@ export const LicensingModal: React.FC<LicensingModalProps> = ({ song, onClose })
     }
 
     const valueNum = parseFloat(offerValue);
-    if (isNaN(valueNum) || valueNum < 30) {
-      setErrorMessage('O valor de aquisição não pode ser inferior a R$ 30,00.');
+    if (isNaN(valueNum) || valueNum < 1) {
+      setErrorMessage('Por favor, insira uma contribuição de pelo menos R$ 1,00 para gerar o Pix.');
       return;
     }
 
@@ -233,8 +235,8 @@ export const LicensingModal: React.FC<LicensingModalProps> = ({ song, onClose })
         phone,
         songId: song.id,
         songName: song.name,
-        purpose: `Aquisição de Licença Comercial: R$ ${valueNum.toFixed(2)} [Mercado Pago Pix]`,
-        audioFormat: 'WAV + MP3 com Contrato de Licença Comercial',
+        purpose: `Contribuição CS do Bem + Licença CS Indeterminada: R$ ${valueNum.toFixed(2)} [Mercado Pago Pix]`,
+        audioFormat: 'WAV + MP3 com Contrato de Licença CS Indeterminada',
         message: message || '',
         offerValue: valueNum,
         status: 'Novo',
@@ -313,13 +315,13 @@ export const LicensingModal: React.FC<LicensingModalProps> = ({ song, onClose })
               </div>
               <div className="space-y-2">
                 <h3 className="text-xl font-bold text-white">
-                  Atenção: Envie o comprovante!
+                  Atenção: Envie o comprovante de contribuição!
                 </h3>
                 <p className="text-neutral-300 text-xs md:text-sm leading-relaxed px-4">
-                  Você precisa enviar a mensagem de confirmação no WhatsApp com o comprovante de pagamento para que o Carlos Silva possa fazer a liberação da sua trilha comercial em alta definição (WAV) e emitir o seu contrato de licença comercial.
+                  Você precisa enviar a mensagem de confirmação no WhatsApp com o comprovante de contribuição para que a equipe do projeto <strong>CS do Bem</strong> possa enviar a sua trilha em alta definição (WAV) e o seu contrato de Licença CS Indeterminada (Uso vitalício e não exclusivo). Aproveite para acompanhar as nossas ações em execução nas nossas redes sociais!
                 </p>
                 <p className="text-neutral-400 text-[11px] leading-relaxed px-4">
-                  Se você fechar ou sair do site sem enviar a mensagem no WhatsApp, a liberação da sua trilha poderá sofrer atrasos.
+                  Se você fechar ou sair do site sem enviar a mensagem no WhatsApp, o recebimento da sua trilha e o agradecimento poderão sofrer atrasos.
                 </p>
               </div>
 
@@ -361,16 +363,31 @@ export const LicensingModal: React.FC<LicensingModalProps> = ({ song, onClose })
               className="space-y-5"
             >
               {/* Header */}
-              <div className="space-y-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-[#00E5FF]/10 text-[#00E5FF] border border-[#00E5FF]/20">
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  Pix Automático Mercado Pago
+              <div className="space-y-3">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
+                  <Heart className="w-3.5 h-3.5 fill-emerald-500/10 text-emerald-400" />
+                  Contribuição Solidária - Projeto CS do Bem ❤️
                 </span>
-                <h2 className="text-2xl font-bold tracking-tight text-white">
-                  Licencie <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00E5FF] to-[#9D50BB]">{song.name}</span>
+                <h2 className="text-xl md:text-2xl font-bold tracking-tight text-white">
+                  Apoie o Projeto & Licencie <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00E5FF] to-[#9D50BB]">{song.name}</span>
                 </h2>
-                <p className="text-neutral-400 text-xs md:text-sm leading-relaxed">
-                  Defina o valor do Pix (mínimo de R$ 30,00). O pagamento é <strong>processado e verificado automaticamente</strong>. Assim que aprovado, o botão do WhatsApp é desbloqueado instantaneamente com os comprovantes para liberação da trilha em alta definição e contrato.
+                
+                {/* Beautiful licensing terms box */}
+                <div className="p-4 rounded-xl bg-neutral-950 border border-neutral-800/80 space-y-2 text-left">
+                  <div className="text-[#00E5FF] font-black text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+                    <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500 animate-pulse" />
+                    Projeto Social <span className="text-[#9D50BB]">CS do Bem</span>
+                  </div>
+                  <div className="text-white text-sm font-bold leading-snug">
+                    Direito de regravação (WAV/MP3) com toda documentação inclusa e apoio ao projeto social!
+                  </div>
+                  <p className="text-neutral-400 text-xs leading-relaxed">
+                    Toda semana, o projeto <strong className="text-[#9D50BB]">CS do Bem</strong> realiza ações para levar apoio e ajudar pessoas necessitadas em situações vulneráveis e de rua. Convidamos você a ver esse lindo projeto em execução e acompanhar as nossas ações pelas redes sociais! Contribua com o valor que sentir no coração e, em agradecimento, garanta o direito ao seu contrato de <strong>Licença CS Indeterminada</strong> para regravar a música, recebendo os arquivos originais em altíssima definição junto a toda documentação da música.
+                  </p>
+                </div>
+
+                <p className="text-neutral-300 text-xs md:text-[13px] leading-relaxed">
+                  Sem taxas comerciais ou obrigatoriedades! <strong>Contribua com a quantia que sentir em seu coração</strong> para apoiar o projeto social. O Pix é processado automaticamente e sua trilha é enviada com rapidez.
                 </p>
               </div>
 
@@ -422,29 +439,49 @@ export const LicensingModal: React.FC<LicensingModalProps> = ({ song, onClose })
                     />
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-neutral-300">Valor do Pix (Mínimo R$ 30,00) *</label>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-neutral-300">Valor do Pix (O que sentir no coração) *</label>
                     <div className="relative flex items-center">
                       <span className="absolute left-4 text-sm font-black text-[#00E5FF] font-mono">R$</span>
                       <input 
                         type="number" 
                         required
-                        min="30"
+                        min="1"
                         step="any"
-                        placeholder="Ex: 30.00"
+                        placeholder="Ex: 20.00"
                         value={offerValue}
                         onChange={e => setOfferValue(e.target.value)}
                         className="w-full pl-10 pr-4 py-2.5 bg-neutral-950 border border-neutral-800 focus:border-[#00E5FF] rounded-xl text-sm text-white focus:outline-none transition font-black font-mono text-[#00E5FF]"
                       />
                     </div>
+                    {/* Predefined donation presets */}
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {[5, 10, 20, 50, 100].map((val) => {
+                        const isSelected = parseFloat(offerValue) === val;
+                        return (
+                          <button
+                            key={val}
+                            type="button"
+                            onClick={() => setOfferValue(val.toString())}
+                            className={`px-3 py-1.5 text-xs font-black font-mono rounded-lg border transition-all cursor-pointer ${
+                              isSelected
+                                ? 'bg-[#00E5FF]/25 text-[#00E5FF] border-[#00E5FF]/60'
+                                : 'bg-neutral-950 text-neutral-400 border-neutral-800/80 hover:bg-neutral-900 hover:text-white'
+                            }`}
+                          >
+                            R$ {val}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-neutral-300">Mensagem adicional / Observações (Opcional)</label>
+                  <label className="text-xs font-bold text-neutral-300">Mensagem de apoio / Observações (Opcional)</label>
                   <textarea 
                     rows={2}
-                    placeholder="Se deseja a trilha em algum formato específico ou se tem detalhes sobre o projeto..."
+                    placeholder="Deixe uma mensagem de apoio ao projeto ou observações sobre o uso da trilha..."
                     value={message}
                     onChange={e => setMessage(e.target.value)}
                     className="w-full px-4 py-2.5 bg-neutral-950 border border-neutral-800 focus:border-[#00E5FF] rounded-xl text-sm text-white placeholder-neutral-600 focus:outline-none transition resize-none font-medium"
@@ -461,13 +498,13 @@ export const LicensingModal: React.FC<LicensingModalProps> = ({ song, onClose })
                   referrerPolicy="no-referrer"
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-[8.5px] text-neutral-400 font-medium font-mono uppercase tracking-wider">Trilha comercial selecionada:</p>
+                  <p className="text-[8.5px] text-neutral-400 font-medium font-mono uppercase tracking-wider">Trilha selecionada:</p>
                   <h4 className="text-sm font-semibold text-white truncate">{song.name}</h4>
                   <p className="text-xs text-neutral-500 truncate">{song.artist}</p>
                 </div>
                 <div className="text-right shrink-0">
                   <span className="text-xs font-black text-[#00E5FF] font-mono">Alta Definição</span>
-                  <p className="text-[9px] text-neutral-500 font-bold uppercase">WAV/MP3 + Contrato</p>
+                  <p className="text-[9px] text-neutral-500 font-bold uppercase">WAV/MP3 + Licença</p>
                 </div>
               </div>
 
@@ -544,7 +581,7 @@ export const LicensingModal: React.FC<LicensingModalProps> = ({ song, onClose })
                 </h3>
                 <p className="text-neutral-400 text-xs px-4">
                   {paymentStatus === 'approved' 
-                    ? `O Mercado Pago confirmou o Pix de R$ ${currentOfferFloat.toFixed(2)}. Liberação concluída!` 
+                    ? `O Mercado Pago confirmou a sua contribuição solidária via Pix. Liberação concluída!` 
                     : `Use o QR Code ou copie a linha Pix para pagar. O sistema confirmará automaticamente em tempo real.`}
                 </p>
               </div>
@@ -666,7 +703,7 @@ export const LicensingModal: React.FC<LicensingModalProps> = ({ song, onClose })
                         <span>WhatsApp Desbloqueado!</span>
                       </div>
                       <p className="text-[10.5px] text-neutral-300 leading-normal">
-                        Pagamento confirmado! Clique abaixo para notificar o Carlos Silva e receber os arquivos de altíssima definição mais o contrato.
+                        Pagamento confirmado! Clique abaixo para notificar o projeto <strong>CS do Bem</strong> e receber os arquivos de altíssima definição mais o contrato.
                       </p>
                     </motion.div>
                   )}

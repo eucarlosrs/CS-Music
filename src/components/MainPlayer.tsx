@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useAudio } from '../context/AudioContext';
 import { LicensingModal } from './LicensingModal';
+import { SpotifyShareModal } from './SpotifyShareModal';
 import { AudioWaveVisualizer } from './AudioWaveVisualizer';
 import { 
   Play, 
@@ -32,6 +33,56 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { PrizeRoulette } from './PrizeRoulette';
+
+const MarqueeText: React.FC<{ text: string; className?: string }> = ({ text, className }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+  const [shouldScroll, setShouldScroll] = useState(false);
+  const [textWidth, setTextWidth] = useState(0);
+
+  useEffect(() => {
+    const measure = () => {
+      if (containerRef.current && textRef.current) {
+        const containerW = containerRef.current.offsetWidth;
+        const textW = textRef.current.offsetWidth;
+        setTextWidth(textW);
+        setShouldScroll(textW > containerW);
+      }
+    };
+
+    // A tiny timeout to ensure styling is applied and container dimensions are ready
+    const timer = setTimeout(measure, 50);
+    window.addEventListener('resize', measure);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', measure);
+    };
+  }, [text]);
+
+  return (
+    <div ref={containerRef} className="overflow-hidden relative w-full whitespace-nowrap">
+      {shouldScroll ? (
+        <motion.div
+          animate={{ x: [0, -(textWidth + 24)] }}
+          transition={{
+            ease: "linear",
+            duration: Math.max(textWidth / 30, 5),
+            repeat: Infinity,
+            repeatType: "loop",
+            repeatDelay: 2.5
+          }}
+          className="inline-flex gap-6 pr-6"
+        >
+          <span ref={textRef} className={className}>{text}</span>
+          <span className={className}>{text}</span>
+        </motion.div>
+      ) : (
+        <span ref={textRef} className={className}>{text}</span>
+      )}
+    </div>
+  );
+};
 
 const CandidateAvatar: React.FC<{ imageUrl?: string; name: string }> = ({ imageUrl, name }) => {
   const [hasError, setHasError] = useState(false);
@@ -79,6 +130,10 @@ export const MainPlayer: React.FC = () => {
     playMode,
     isLyricsExpanded,
     setIsLyricsExpanded,
+    isPlayerExpanded: isExpanded,
+    setIsPlayerExpanded: setIsExpanded,
+    isVotingModalOpen: showVotingModal,
+    setIsVotingModalOpen: setShowVotingModal,
     likedSongs,
     togglePlay,
     nextSong,
@@ -95,15 +150,15 @@ export const MainPlayer: React.FC = () => {
     voteCandidate
   } = useAudio();
 
-  const [isExpanded, setIsExpanded] = useState(false);
-
   // Manipular o botão voltar (back button) para fechar o player em tela cheia ao invés de fechar o app
   useEffect(() => {
     if (isExpanded) {
       window.history.pushState({ playerExpanded: true }, "");
 
       const handlePopState = (event: PopStateEvent) => {
-        setIsExpanded(false);
+        if (!event.state || !event.state.playerExpanded) {
+          setIsExpanded(false);
+        }
       };
 
       window.addEventListener("popstate", handlePopState);
@@ -116,6 +171,7 @@ export const MainPlayer: React.FC = () => {
       };
     }
   }, [isExpanded]);
+
   const [showSharePanel, setShowSharePanel] = useState(false);
   const [showLicensing, setShowLicensing] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
@@ -126,8 +182,61 @@ export const MainPlayer: React.FC = () => {
   const [isSaved, setIsSaved] = useState(false);
 
   // States for "Na voz desse artista vira hit"
-  const [showVotingModal, setShowVotingModal] = useState(false);
   const [votedArtistsBySong, setVotedArtistsBySong] = useState<Record<string, string>>({});
+
+  const votedArtistName = currentSong ? votedArtistsBySong[currentSong.id] : null;
+  const votedCandidate = votedArtistName && currentSong
+    ? currentSong.candidateArtists?.find(c => c.name === votedArtistName)
+    : null;
+
+  // Manipular o botão voltar (back button) para fechar o modal de votação ao invés de fechar o app
+  useEffect(() => {
+    if (showVotingModal) {
+      window.history.pushState({ votingModalOpen: true }, "");
+
+      const handlePopState = (event: PopStateEvent) => {
+        setShowVotingModal(false);
+      };
+
+      window.addEventListener("popstate", handlePopState);
+
+      return () => {
+        window.removeEventListener("popstate", handlePopState);
+        if (window.history.state?.votingModalOpen) {
+          window.history.back();
+        }
+      };
+    }
+  }, [showVotingModal]);
+
+  // Control music volume during Vira Hit voting/roulette stage
+  useEffect(() => {
+    if (showVotingModal) {
+      setVolume(0.2);
+    } else {
+      setVolume(1.0);
+    }
+  }, [showVotingModal, setVolume]);
+
+  // Manipular o botão voltar (back button) para fechar o painel de compartilhamento ao invés de fechar o app
+  useEffect(() => {
+    if (showSharePanel) {
+      window.history.pushState({ sharePanelOpen: true }, "");
+
+      const handlePopState = (event: PopStateEvent) => {
+        setShowSharePanel(false);
+      };
+
+      window.addEventListener("popstate", handlePopState);
+
+      return () => {
+        window.removeEventListener("popstate", handlePopState);
+        if (window.history.state?.sharePanelOpen) {
+          window.history.back();
+        }
+      };
+    }
+  }, [showSharePanel]);
 
   // Check if there are differences between selected and original playlists
   const hasChanges = useMemo(() => {
@@ -255,8 +364,8 @@ export const MainPlayer: React.FC = () => {
                 className="w-10 h-10 object-cover rounded-xl shadow-md shrink-0" 
                 referrerPolicy="no-referrer"
               />
-              <div className="min-w-0">
-                <h4 className="text-sm font-semibold truncate text-white">{currentSong.name}</h4>
+              <div className="min-w-0 flex-1">
+                <MarqueeText text={currentSong.name} className="text-sm font-semibold text-white" />
                 <p className="text-xs text-[#A1A1AA] truncate">{currentSong.artist}</p>
               </div>
             </div>
@@ -337,10 +446,13 @@ export const MainPlayer: React.FC = () => {
               <button 
                 id="trigger-licensing-btn"
                 onClick={() => setShowLicensing(true)}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-tr from-[#00E5FF] to-[#9D50BB] text-black text-xs font-black shadow-lg hover:opacity-90 active:scale-95 transition rounded-full"
+                className="inline-flex items-center gap-2 px-4 py-1.5 bg-gradient-to-tr from-[#00E5FF] to-[#9D50BB] text-black rounded-xl shadow-lg hover:opacity-90 active:scale-95 transition cursor-pointer"
               >
-                <ShieldCheck className="w-4 h-4" />
-                <span>Comprar Música</span>
+                <Heart className="w-4 h-4 text-red-600 fill-red-600 shrink-0 animate-pulse" />
+                <div className="flex flex-col items-center text-center leading-tight">
+                  <span className="text-[10px] font-black">Licenciar / Apoiar</span>
+                  <span className="text-[9px] font-black uppercase tracking-wider opacity-90">CS do Bem</span>
+                </div>
               </button>
             </div>
 
@@ -364,7 +476,7 @@ export const MainPlayer: React.FC = () => {
                 {/* Song and Author details */}
                 <div className="w-full text-center md:text-left flex items-start justify-between gap-4 max-w-sm">
                   <div className="text-left w-full min-w-0">
-                    <h2 className="text-xl md:text-2xl font-black text-white truncate font-sans tracking-tight">{currentSong.name}</h2>
+                    <MarqueeText text={currentSong.name} className="text-xl md:text-2xl font-black text-white font-sans tracking-tight" />
                     <p className="text-sm text-[#A1A1AA] font-medium truncate mt-1">{currentSong.artist}</p>
                   </div>
                   <div className="flex gap-2 shrink-0">
@@ -507,11 +619,11 @@ export const MainPlayer: React.FC = () => {
                 <div className="flex items-center justify-between pt-4 border-t border-[#1F1F22] text-[#71717A] text-xs">
                   
                   {/* Adaptive Volume Controller */}
-                  <div className="flex items-center gap-2 w-1/3 min-w-[100px]" onClick={e => e.stopPropagation()}>
+                  <div className="flex items-center gap-1.5 w-1/3 min-w-[110px] h-8" onClick={e => e.stopPropagation()}>
                     <button 
                       id="mute-unmute-btn"
                       onClick={() => setMuted(!isMuted)}
-                      className="p-1 rounded-full text-[#A1A1AA] hover:text-white transition shrink-0"
+                      className="w-8 h-8 rounded-xl flex items-center justify-center text-[#A1A1AA] hover:text-white hover:bg-white/5 transition shrink-0"
                     >
                       {isMuted || volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
                     </button>
@@ -523,87 +635,39 @@ export const MainPlayer: React.FC = () => {
                       step="0.01"
                       value={isMuted ? 0 : volume}
                       onChange={e => setVolume(Number(e.target.value))}
-                      className="w-full h-1 bg-[#1F1F22] rounded-lg appearance-none cursor-pointer accent-[#00E5FF] focus:outline-none"
+                      className="w-full h-1 bg-[#1F1F22] rounded-lg appearance-none cursor-pointer accent-[#00E5FF] focus:outline-none my-auto"
                     />
                   </div>
 
                   {/* Toggle Share Panel panel layout */}
-                  <div className="flex items-center gap-2 relative shrink-0">
+                  <div className="flex items-center gap-2.5 relative shrink-0 h-8">
                     <button 
                       id="trigger-hit-vocal-btn"
-                      onClick={() => setShowVotingModal(true)}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-[#00E5FF]/20 bg-[#00E5FF]/5 text-[#00E5FF] hover:bg-[#00E5FF]/15 hover:border-[#00E5FF]/40 transition text-xs font-bold shrink-0"
+                      onClick={() => {
+                        // Limpa o voto da música atual para permitir votar novamente ao reabrir o modal
+                        if (currentSong) {
+                          const updated = { ...votedArtistsBySong };
+                          delete updated[currentSong.id];
+                          setVotedArtistsBySong(updated);
+                        }
+                        setShowVotingModal(true);
+                      }}
+                      className="h-8 inline-flex items-center gap-1.5 px-3 rounded-xl border border-[#00E5FF]/20 bg-[#00E5FF]/5 text-[#00E5FF] hover:bg-[#00E5FF]/15 hover:border-[#00E5FF]/40 transition text-xs font-bold shrink-0"
                       title="Na voz desse artista vira hit"
                     >
                       <Sparkles className="w-3.5 h-3.5 text-[#00E5FF] shrink-0" />
-                      <span className="hidden sm:inline">Na voz desse artista vira hit</span>
-                      <span className="sm:hidden">Vira Hit?</span>
+                      <span className="hidden sm:inline">Votar no vira hit</span>
+                      <span className="sm:hidden">Votar no vira hit</span>
                     </button>
 
                     <button 
                       id="trigger-share-panel-btn"
-                      onClick={() => setShowSharePanel(!showSharePanel)}
-                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#1F1F22] bg-[#18181B] hover:border-[#27272A] hover:text-white transition ${showSharePanel ? 'text-[#00E5FF] border-[#00E5FF]/20' : 'text-[#A1A1AA]'}`}
+                      onClick={() => setShowSharePanel(true)}
+                      className={`w-8 h-8 inline-flex items-center justify-center rounded-xl border border-[#1F1F22] bg-[#18181B] hover:border-[#27272A] hover:text-white transition shrink-0 ${showSharePanel ? 'text-[#00E5FF] border-[#00E5FF]/20' : 'text-[#A1A1AA]'}`}
+                      title="Compartilhar música"
                     >
-                      <Share2 className="w-3.5 h-3.5" />
-                      <span>Compartilhar</span>
+                      <Share2 className="w-4 h-4" />
                     </button>
-
-                    {/* Pop-up sharing overlays */}
-                    <AnimatePresence>
-                      {showSharePanel && (
-                        <motion.div 
-                          id="share-dropdown-panel"
-                          initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                          animate={{ opacity: 1, y: -80, scale: 1 }}
-                          exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                          className="absolute bottom-12 right-0 bg-[#121214] border border-[#1F1F22] p-2.5 rounded-xl flex items-center gap-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.9)] z-50 whitespace-nowrap"
-                        >
-                          <button 
-                            id="share-whatsapp-btn"
-                            onClick={() => handleShareClick('whatsapp')}
-                            className="p-2 rounded-xl hover:bg-neutral-900 text-emerald-400 transition"
-                            title="Compartilhar no WhatsApp"
-                          >
-                            <MessageCircle className="w-5 h-5" />
-                          </button>
-                          <button 
-                            id="share-instagram-btn"
-                            onClick={() => handleShareClick('instagram')}
-                            className="p-2 rounded-xl hover:bg-neutral-900 text-pink-500 transition"
-                            title="Adicionar no Stories"
-                          >
-                            <ChevronUp className="w-5 h-5 -rotate-45" />
-                          </button>
-                          <button 
-                            id="share-facebook-btn"
-                            onClick={() => handleShareClick('facebook')}
-                            className="p-2 rounded-xl hover:bg-neutral-900 text-blue-500 transition"
-                            title="Compartilhar no Facebook"
-                          >
-                            <Facebook className="w-4.5 h-4.5" />
-                          </button>
-                          <button 
-                            id="share-twitter-btn"
-                            onClick={() => handleShareClick('twitter')}
-                            className="p-2 rounded-xl hover:bg-neutral-900 text-slate-300 transition"
-                            title="Compartilhar no X"
-                          >
-                            <Twitter className="w-4.5 h-4.5" />
-                          </button>
-                          <div className="w-px h-6 bg-[#27272A] mx-1" />
-                          <button 
-                            id="share-copylink-btn"
-                            onClick={() => handleShareClick('copy')}
-                            className="p-2 rounded-xl hover:bg-neutral-900 text-[#00E5FF] hover:text-[#00E5FF]/85 transition flex items-center gap-1 text-[11px] font-semibold"
-                            title="Copiar link"
-                          >
-                            {shareCopied ? <Check className="w-4 h-4 text-emerald-400" /> : <Link className="w-4 h-4" />}
-                            <span>{shareCopied ? 'Copiado!' : 'Link'}</span>
-                          </button>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
                   </div>
 
                 </div>
@@ -621,6 +685,17 @@ export const MainPlayer: React.FC = () => {
           <LicensingModal 
             song={currentSong} 
             onClose={() => setShowLicensing(false)} 
+          />
+        )}
+      </AnimatePresence>
+
+      {/* SPOTIFY-LIKE SHARE STICKER MODAL */}
+      <AnimatePresence>
+        {showSharePanel && currentSong && (
+          <SpotifyShareModal 
+            song={currentSong} 
+            isOpen={showSharePanel} 
+            onClose={() => setShowSharePanel(false)} 
           />
         )}
       </AnimatePresence>
@@ -803,130 +878,142 @@ export const MainPlayer: React.FC = () => {
       {/* 5. NA VOZ DESSE ARTISTA VIRA HIT MODAL/PAGINA OVERLAY */}
       <AnimatePresence>
         {showVotingModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="w-full max-w-md bg-[#0F0F11] border border-[#1F1F22] p-6 rounded-2xl space-y-6 shadow-[0_20px_50px_rgba(0,0,0,0.9)] relative text-left"
-            >
-              {/* Close Button */}
-              <button
-                type="button"
-                onClick={() => setShowVotingModal(false)}
-                className="absolute top-4 right-4 p-2 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white transition cursor-pointer"
+          votedCandidate ? (
+            <PrizeRoulette 
+              votedArtist={votedCandidate} 
+              onClose={() => {
+                setShowVotingModal(false);
+                setIsExpanded(false);
+              }} 
+            />
+          ) : (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="w-full max-w-md bg-[#0F0F11] border border-[#1F1F22] p-6 rounded-2xl space-y-6 shadow-[0_20px_50px_rgba(0,0,0,0.9)] relative text-left"
               >
-                <X className="w-4.5 h-4.5" />
-              </button>
+                {/* Close Button */}
+                <button
+                  type="button"
+                  onClick={() => setShowVotingModal(false)}
+                  className="absolute top-4 right-4 p-2 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white transition cursor-pointer"
+                >
+                  <X className="w-4.5 h-4.5" />
+                </button>
 
-              {/* Title & Description */}
-              <div className="space-y-1.5 pr-8 font-sans">
-                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#00E5FF]/10 text-[#00E5FF] border border-[#00E5FF]/20 text-[9px] font-bold uppercase tracking-wider">
-                  <Sparkles className="w-3 h-3 text-[#00E5FF] animate-pulse" /> Votação Popular
-                </div>
-                <h3 className="text-base font-black text-white font-sans tracking-tight">
-                  Na Voz Desse Artista Vira Hit?
-                </h3>
-                <p className="text-xs text-[#A1A1AA] leading-relaxed font-medium">
-                  Selecione qual artista ficaria melhor interpretando esta obra e dê o seu voto para virar um grande sucesso!
-                </p>
-              </div>
-
-              {/* Current Song Card Context */}
-              {currentSong ? (
-                <div className="flex items-center gap-3 bg-[#161619] border border-[#1F1F22] p-3 rounded-xl font-sans">
-                  <img
-                    src={currentSong.coverUrl}
-                    alt={currentSong.name}
-                    className="w-12 h-12 rounded-lg object-cover border border-[#27272A]"
-                    referrerPolicy="no-referrer"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-bold text-white truncate">{currentSong.name}</p>
-                    <p className="text-[10px] text-[#A1A1AA] truncate mt-0.5">{currentSong.artist}</p>
+                <>
+                  {/* Title & Description */}
+                  <div className="space-y-1.5 pr-8 font-sans">
+                    <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#00E5FF]/10 text-[#00E5FF] border border-[#00E5FF]/20 text-[9px] font-bold uppercase tracking-wider">
+                      <Sparkles className="w-3 h-3 text-[#00E5FF] animate-pulse" /> Votação Popular
+                    </div>
+                    <h3 className="text-base font-black text-white font-sans tracking-tight">
+                      Na Voz Desse Artista Vira Hit?
+                    </h3>
+                    <p className="text-xs text-[#A1A1AA] leading-relaxed font-medium">
+                      Selecione qual artista ficaria melhor interpretando esta obra e dê o seu voto para virar um grande sucesso!
+                    </p>
                   </div>
-                </div>
-              ) : (
-                <div className="text-center p-4 bg-[#161619] border border-[#1F1F22] rounded-xl text-xs text-[#71717A] font-semibold font-sans">
-                  Nenhuma música selecionada para votação.
-                </div>
-              )}
 
-              {/* Candidate Artists List */}
-              {currentSong && (
-                <div className="space-y-2.5 font-sans">
-                  {(!currentSong.candidateArtists || currentSong.candidateArtists.length === 0) ? (
-                    <div className="text-center p-6 border border-dashed border-[#1F1F22] rounded-xl text-xs text-[#71717A] font-sans">
-                      Nenhum artista foi cadastrado para votação nesta música.
+                  {/* Current Song Card Context */}
+                  {currentSong ? (
+                    <div className="flex items-center gap-3 bg-[#161619] border border-[#1F1F22] p-3 rounded-xl font-sans">
+                      <img
+                        src={currentSong.coverUrl}
+                        alt={currentSong.name}
+                        className="w-12 h-12 rounded-lg object-cover border border-[#27272A]"
+                        referrerPolicy="no-referrer"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-bold text-white truncate">{currentSong.name}</p>
+                        <p className="text-[10px] text-[#A1A1AA] truncate mt-0.5">{currentSong.artist}</p>
+                      </div>
                     </div>
                   ) : (
-                    currentSong.candidateArtists.map((candidate, idx) => {
-                      const hasVotedThis = votedArtistsBySong[currentSong.id] === candidate.name;
-                      const hasVotedAny = !!votedArtistsBySong[currentSong.id];
-                      
-                      return (
-                        <div
-                          key={idx}
-                          className={`flex items-center justify-between p-3.5 rounded-xl border transition-all duration-300 ${
-                            hasVotedThis
-                              ? 'bg-[#00E5FF]/10 border-[#00E5FF]/40 shadow-[0_0_12px_rgba(0,229,255,0.15)]'
-                              : 'bg-[#141417] border-[#1F1F22] hover:border-[#27272A]'
-                          }`}
-                        >
-                          <div className="min-w-0 pr-3 flex items-center gap-3">
-                            <span className="w-5 h-5 rounded-md bg-neutral-900 text-[10px] font-black text-[#A1A1AA] flex items-center justify-center border border-[#1F1F22] shrink-0">
-                              {idx + 1}
-                            </span>
-
-                            <CandidateAvatar imageUrl={candidate.imageUrl} name={candidate.name} />
-
-                            <div className="min-w-0">
-                              <p className="text-xs font-bold text-white truncate">{candidate.name}</p>
-                              <div className="flex items-center gap-1.5 mt-0.5">
-                                <TrendingUp className="w-3 h-3 text-[#71717A]" />
-                                <span className="text-[10px] text-[#A1A1AA] font-semibold">
-                                  {candidate.votes || 0} {candidate.votes === 1 ? 'voto' : 'votos'}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          <button
-                            type="button"
-                            disabled={hasVotedAny}
-                            onClick={() => handleVote(candidate.name)}
-                            className={`px-4 py-1.5 rounded-xl text-[10px] font-bold transition-all duration-300 flex items-center gap-1 cursor-pointer ${
-                              hasVotedThis
-                                ? 'bg-emerald-500/15 border border-emerald-500/20 text-emerald-400 cursor-default'
-                                : hasVotedAny
-                                  ? 'bg-[#1C1C1E] text-[#71717A] border border-transparent cursor-not-allowed opacity-40'
-                                  : 'bg-[#00E5FF] hover:bg-[#00E5FF]/90 text-black hover:scale-105 active:scale-95 shadow-[0_0_8px_rgba(0,229,255,0.15)]'
-                            }`}
-                          >
-                            {hasVotedThis ? (
-                              <>
-                                <Check className="w-3 h-3 stroke-[3px]" />
-                                <span>Votado!</span>
-                              </>
-                            ) : (
-                              <span>Votar</span>
-                            )}
-                          </button>
-                        </div>
-                      );
-                    })
+                    <div className="text-center p-4 bg-[#161619] border border-[#1F1F22] rounded-xl text-xs text-[#71717A] font-semibold font-sans">
+                      Nenhuma música selecionada para votação.
+                    </div>
                   )}
-                </div>
-              )}
 
-              {/* Bottom Information */}
-              <div className="text-center font-sans">
-                <p className="text-[9px] text-[#71717A] font-semibold uppercase tracking-wider">
-                  CS Music Votos Seguros • Licenciado em tempo real
-                </p>
-              </div>
-            </motion.div>
-          </div>
+                  {/* Candidate Artists List */}
+                  {currentSong && (
+                    <div className="space-y-2.5 font-sans">
+                      {(!currentSong.candidateArtists || currentSong.candidateArtists.length === 0) ? (
+                        <div className="text-center p-6 border border-dashed border-[#1F1F22] rounded-xl text-xs text-[#71717A] font-sans">
+                          Nenhum artista foi cadastrado para votação nesta música.
+                        </div>
+                      ) : (
+                        currentSong.candidateArtists.map((candidate, idx) => {
+                          const hasVotedThis = votedArtistsBySong[currentSong.id] === candidate.name;
+                          const hasVotedAny = !!votedArtistsBySong[currentSong.id];
+                          
+                          return (
+                            <div
+                              key={idx}
+                              className={`flex items-center justify-between p-3.5 rounded-xl border transition-all duration-300 ${
+                                hasVotedThis
+                                  ? 'bg-[#00E5FF]/10 border-[#00E5FF]/40 shadow-[0_0_12px_rgba(0,229,255,0.15)]'
+                                  : 'bg-[#141417] border-[#1F1F22] hover:border-[#27272A]'
+                              }`}
+                            >
+                              <div className="min-w-0 pr-3 flex items-center gap-3">
+                                <span className="w-5 h-5 rounded-md bg-neutral-900 text-[10px] font-black text-[#A1A1AA] flex items-center justify-center border border-[#1F1F22] shrink-0">
+                                  {idx + 1}
+                                </span>
+
+                                <CandidateAvatar imageUrl={candidate.imageUrl} name={candidate.name} />
+
+                                <div className="min-w-0">
+                                  <p className="text-xs font-bold text-white truncate">{candidate.name}</p>
+                                  <div className="flex items-center gap-1.5 mt-0.5">
+                                    <TrendingUp className="w-3 h-3 text-[#71717A]" />
+                                    <span className="text-[10px] text-[#A1A1AA] font-semibold">
+                                      {candidate.votes || 0} {candidate.votes === 1 ? 'voto' : 'votos'}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <button
+                                type="button"
+                                disabled={hasVotedAny}
+                                onClick={() => handleVote(candidate.name)}
+                                className={`px-4 py-1.5 rounded-xl text-[10px] font-bold transition-all duration-300 flex items-center gap-1 cursor-pointer ${
+                                  hasVotedThis
+                                    ? 'bg-emerald-500/15 border border-emerald-500/20 text-emerald-400 cursor-default'
+                                    : hasVotedAny
+                                      ? 'bg-[#1C1C1E] text-[#71717A] border border-transparent cursor-not-allowed opacity-40'
+                                      : 'bg-[#00E5FF] hover:bg-[#00E5FF]/90 text-black hover:scale-105 active:scale-95 shadow-[0_0_8px_rgba(0,229,255,0.15)]'
+                                }`}
+                              >
+                                {hasVotedThis ? (
+                                  <>
+                                    <Check className="w-3 h-3 stroke-[3px]" />
+                                    <span>Votado!</span>
+                                  </>
+                                ) : (
+                                  <span>Votar</span>
+                                )}
+                              </button>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  )}
+
+                  {/* Bottom Information */}
+                  <div className="text-center font-sans">
+                    <p className="text-[9px] text-[#71717A] font-semibold uppercase tracking-wider">
+                      CS Music Votos Seguros • Licenciado em tempo real
+                    </p>
+                  </div>
+                </>
+              </motion.div>
+            </div>
+          )
         )}
       </AnimatePresence>
     </>

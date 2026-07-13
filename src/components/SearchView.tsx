@@ -4,7 +4,7 @@ import { Song } from '../types';
 import { Search, Flame, Play, Music, ArrowRight, Disc, Sliders } from 'lucide-react';
 
 export const SearchView: React.FC = () => {
-  const { songs, playSong, currentSong, isPlaying, togglePlay } = useAudio();
+  const { songs, playSong, currentSong, isPlaying, togglePlay, setIsPlayerExpanded } = useAudio();
   const [query, setQuery] = useState('');
 
   // Baseline Brazilian and standard electronic genres
@@ -85,15 +85,25 @@ export const SearchView: React.FC = () => {
     return matchingSong ? matchingSong.coverUrl : 'https://lh3.googleusercontent.com/d/1kpzAB3S4ebv0fz1CdBlB2Rbx0kLYCJJe';
   };
 
-  const results = query.trim() !== ''
-    ? songs.filter(song => 
-        song.name.toLowerCase().includes(query.toLowerCase()) ||
-        song.album.toLowerCase().includes(query.toLowerCase()) ||
-        song.genre.toLowerCase().includes(query.toLowerCase()) ||
-        (song.secondGenre && song.secondGenre.toLowerCase().includes(query.toLowerCase())) ||
-        song.artist.toLowerCase().includes(query.toLowerCase())
-      )
-    : [];
+  const results = React.useMemo(() => {
+    if (query.trim() === '') return [];
+    const q = query.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    return songs.filter(song => {
+      const nameNorm = song.name ? song.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() : '';
+      const artistNorm = song.artist ? song.artist.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() : '';
+      const albumNorm = song.album ? song.album.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() : '';
+      const genreNorm = song.genre ? song.genre.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() : '';
+      const secondGenreNorm = song.secondGenre ? song.secondGenre.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() : '';
+      
+      return (
+        nameNorm.includes(q) ||
+        artistNorm.includes(q) ||
+        albumNorm.includes(q) ||
+        genreNorm.includes(q) ||
+        secondGenreNorm.includes(q)
+      );
+    });
+  }, [songs, query]);
 
   const handleTrackClick = (song: Song) => {
     if (currentSong?.id === song.id) {
@@ -102,6 +112,7 @@ export const SearchView: React.FC = () => {
       const activeQueue = results.length > 0 ? results : songs;
       playSong(song, activeQueue);
     }
+    setIsPlayerExpanded(true);
   };
 
   return (

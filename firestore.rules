@@ -151,5 +151,23 @@ service cloud.firestore {
 
       allow delete: if isAdmin();
     }
+
+    // 5. Roulette Config Collection
+    match /roulette/{documentId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 6. CS do Bem Actions Collection
+    match /csdobem_actions/{actionId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 7. CS do Bem Stats Document/Collection
+    match /csdobem_stats/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
   }
 }

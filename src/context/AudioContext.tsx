@@ -29,6 +29,10 @@ interface AudioContextType {
   playMode: PlayMode;
   isLyricsExpanded: boolean;
   setIsLyricsExpanded: (val: boolean) => void;
+  isPlayerExpanded: boolean;
+  setIsPlayerExpanded: (val: boolean) => void;
+  isVotingModalOpen: boolean;
+  setIsVotingModalOpen: (val: boolean) => void;
   likedSongs: string[];
   likedPlaylists: string[];
   history: string[];
@@ -156,6 +160,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isMuted, setIsMuted] = useState(false);
   const [playMode, setPlayMode] = useState<PlayMode>('regular');
   const [isLyricsExpanded, setIsLyricsExpanded] = useState(false);
+  const [isPlayerExpanded, setIsPlayerExpanded] = useState(false);
+  const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
   const [likedSongs, setLikedSongs] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('cs_liked_songs');
@@ -442,7 +448,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     queue: [] as Song[],
     currentIndex: -1,
     playMode: 'regular' as PlayMode,
-    songs: [] as Song[]
+    songs: [] as Song[],
+    currentSong: null as Song | null
   });
 
   // Keep the ref strictly up-to-date
@@ -451,61 +458,12 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       queue,
       currentIndex,
       playMode,
-      songs
+      songs,
+      currentSong
     };
-  }, [queue, currentIndex, playMode, songs]);
+  }, [queue, currentIndex, playMode, songs, currentSong]);
 
-  // Sync state parameters to HTML5 audio element (Initialize once to avoid resetting playback on state updates)
-  useEffect(() => {
-    const audio = new Audio();
-    audioRef.current = audio;
-
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
-    const handleTimeUpdate = () => {
-      if (audio.duration) {
-        setCurrentTime(audio.currentTime);
-        setProgress((audio.currentTime / audio.duration) * 100);
-      }
-    };
-    const handleLoadedMetadata = () => {
-      setDuration(audio.duration || 0);
-    };
-
-    audio.addEventListener('play', handlePlay);
-    audio.addEventListener('pause', handlePause);
-    audio.addEventListener('timeupdate', handleTimeUpdate);
-    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
-
-    return () => {
-      audio.pause();
-      audio.removeEventListener('play', handlePlay);
-      audio.removeEventListener('pause', handlePause);
-      audio.removeEventListener('timeupdate', handleTimeUpdate);
-      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
-    };
-  }, []);
-
-  // Listen for song completion and play next separately so we don't recreate the Audio element
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const handleEnded = () => {
-      const { playMode: currentPlayMode } = playerStateRef.current;
-      if (currentPlayMode === 'repeat') {
-        audio.currentTime = 0;
-        audio.play().catch(err => console.log("Audio replay error: ", err));
-      } else {
-        handleNextSong();
-      }
-    };
-
-    audio.addEventListener('ended', handleEnded);
-    return () => {
-      audio.removeEventListener('ended', handleEnded);
-    };
-  }, []);
+  const hasTriggeredEndedRef = useRef<string | null>(null);
 
   // Sync mute and volume level changes
   useEffect(() => {
@@ -531,6 +489,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const playSong = async (song: Song, customQueue?: Song[]) => {
     if (!audioRef.current) return;
 
+    // Reset the end-triggered ref for this new track
+    hasTriggeredEndedRef.current = null;
+
     // Record previous song to history
     if (currentSong && !history.includes(currentSong.id)) {
       setHistory(prev => [currentSong.id, ...prev.slice(0, 19)]); // keep max 20
@@ -542,6 +503,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const index = currentQ.findIndex(s => s.id === song.id);
     setCurrentIndex(index >= 0 ? index : 0);
     setCurrentSong(song);
+    setIsPlayerExpanded(true);
 
     audioRef.current.src = song.audioUrl;
     audioRef.current.load();
@@ -551,7 +513,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setIsPlaying(true);
       recordListen(song.id);
     } catch (err) {
-      console.error("Audio playback policy blocker triggered. Ready to play on user gesture", err);
+      console.error("Audio playback policy blocker/error triggered:", err);
+      setIsPlaying(false);
     }
   };
 
@@ -561,7 +524,12 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       audioRef.current.pause();
       setIsPlaying(false);
     } else {
-      audioRef.current.play().then(() => setIsPlaying(true)).catch(err => console.log("Play failed: ", err));
+      audioRef.current.play()
+        .then(() => setIsPlaying(true))
+        .catch(err => {
+          console.error("Play failed: ", err);
+          setIsPlaying(false);
+        });
     }
   };
 
@@ -604,6 +572,83 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       playSong(prevTrack, activeQueue);
     }
   };
+
+  const triggerSongEnd = () => {
+    const { currentSong: activeSong, playMode: currentPlayMode } = playerStateRef.current;
+    if (!activeSong) return;
+
+    if (hasTriggeredEndedRef.current === activeSong.id) return;
+    hasTriggeredEndedRef.current = activeSong.id;
+
+    console.log(`Song end triggered for: ${activeSong.id}`);
+
+    if (currentPlayMode === 'repeat') {
+      if (audioRef.current) {
+        hasTriggeredEndedRef.current = null;
+        audioRef.current.currentTime = 0;
+        audioRef.current.play()
+          .then(() => setIsPlaying(true))
+          .catch(err => {
+            console.warn("Audio replay error inside triggerSongEnd: ", err);
+            setIsPlaying(false);
+          });
+      }
+    } else {
+      handleNextSong();
+    }
+  };
+
+  // Sync state parameters to HTML5 audio element and manage all event listeners in a single robust hook
+  useEffect(() => {
+    const audio = new Audio();
+    audioRef.current = audio;
+
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    
+    const handleTimeUpdate = () => {
+      if (audio.duration) {
+        setCurrentTime(audio.currentTime);
+        setProgress((audio.currentTime / audio.duration) * 100);
+
+        // Fail-safe: if the audio is playing but gets stuck close to or at the end, trigger transition
+        const { currentSong: activeSong } = playerStateRef.current;
+        if (activeSong && (audio.ended || audio.currentTime >= audio.duration - 0.25)) {
+          triggerSongEnd();
+        }
+      }
+    };
+
+    const handleLoadedMetadata = () => {
+      setDuration(audio.duration || 0);
+    };
+
+    const handleEnded = () => {
+      triggerSongEnd();
+    };
+
+    const handleError = (e: any) => {
+      console.error("Audio playback/network error occurred: ", e);
+      setIsPlaying(false);
+    };
+
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError);
+
+    return () => {
+      audio.pause();
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleError);
+    };
+  }, []);
 
   const updateQueue = (newQueue: Song[]) => {
     setQueue(newQueue);
@@ -742,6 +787,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       playMode,
       isLyricsExpanded,
       setIsLyricsExpanded,
+      isPlayerExpanded,
+      setIsPlayerExpanded,
+      isVotingModalOpen,
+      setIsVotingModalOpen,
       likedSongs,
       likedPlaylists,
       history,

@@ -56,4 +56,23 @@ export interface UserProfile {
   createdAt: string;
 }
 
+export interface CsDoBemAction {
+  id: string;
+  date: string;
+  title: string;
+  description: string;
+  amountSpent: number;
+  photos?: string[];
+  videoUrl?: string;
+  createdAt: string;
+}
+
+export interface CsDoBemStats {
+  id: string;
+  totalRaised: number;
+  instagramUrl?: string;
+  tiktokUrl?: string;
+  youtubeUrl?: string;
+}
+
 export type PlayMode = 'regular' | 'repeat' | 'shuffle';

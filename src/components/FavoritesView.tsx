@@ -31,7 +31,8 @@ export const FavoritesView: React.FC = () => {
     userProfile,
     customPlaylists,
     createPlaylist,
-    deletePlaylist
+    deletePlaylist,
+    setIsPlayerExpanded
   } = useAudio();
 
   const [activeTab, setActiveTab] = useState<'liked' | 'playlists' | 'history'>('liked');
@@ -110,6 +111,7 @@ export const FavoritesView: React.FC = () => {
     } else {
       playSong(song, list);
     }
+    setIsPlayerExpanded(true);
   };
 
   return (

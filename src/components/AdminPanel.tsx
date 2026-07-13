@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useAudio } from '../context/AudioContext';
-import { Song, LicensingRequest } from '../types';
+import { Song, LicensingRequest, CsDoBemAction, CsDoBemStats } from '../types';
 import { db, auth, storage } from '../firebase';
 import { 
   collection, 
@@ -31,7 +31,21 @@ import {
   ShieldAlert,
   Loader2,
   Building,
-  Upload
+  Upload,
+  ChevronDown,
+  ChevronUp,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  X,
+  Heart,
+  Calendar,
+  DollarSign,
+  Globe,
+  Instagram,
+  Youtube,
+  ShieldCheck,
+  Image as ImageIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -267,9 +281,80 @@ interface AdminPanelProps {
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({ onTriggerLogin }) => {
   const { songs, reloadSongs, userProfile } = useAudio();
+  const tabsContainerRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const checkScroll = () => {
+    if (tabsContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = tabsContainerRef.current;
+      setCanScrollLeft(scrollLeft > 5);
+      setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 5);
+    }
+  };
+
+  useEffect(() => {
+    const container = tabsContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', checkScroll);
+      // Run once on mount and also inside a timeout to ensure element is rendered
+      checkScroll();
+      const timer = setTimeout(checkScroll, 200);
+      window.addEventListener('resize', checkScroll);
+      return () => {
+        container.removeEventListener('scroll', checkScroll);
+        window.removeEventListener('resize', checkScroll);
+        clearTimeout(timer);
+      };
+    }
+  }, []);
+
+  const [activeTab, setActiveTab] = useState<'musicas' | 'licenciamento' | 'estatisticas' | 'roleta' | 'csdobem'>('musicas');
   const [licensingRequests, setLicensingRequests] = useState<LicensingRequest[]>([]);
-  const [activeTab, setActiveTab] = useState<'musicas' | 'licenciamento' | 'estatisticas'>('musicas');
   const [isLoadingRequests, setIsLoadingRequests] = useState(true);
+
+  const autoTotalPaidLicensing = useMemo(() => {
+    return licensingRequests
+      .filter(req => req.status === 'Pago' || req.status === 'Fechado')
+      .reduce((sum, req) => sum + (req.offerValue || 0), 0);
+  }, [licensingRequests]);
+
+  // CS do Bem stats state
+  const [adminTotalRaised, setAdminTotalRaised] = useState(1250);
+  const [adminInstagramUrl, setAdminInstagramUrl] = useState('https://instagram.com');
+  const [adminTiktokUrl, setAdminTiktokUrl] = useState('https://tiktok.com');
+  const [adminYoutubeUrl, setAdminYoutubeUrl] = useState('https://youtube.com');
+  const [isSavingCsDoBemStats, setIsSavingCsDoBemStats] = useState(false);
+
+  // CS do Bem Actions state
+  const [csDoBemActions, setCsDoBemActions] = useState<CsDoBemAction[]>([]);
+  const [showActionForm, setShowActionForm] = useState(false);
+  const [editingAction, setEditingAction] = useState<CsDoBemAction | null>(null);
+  const [actionTitle, setActionTitle] = useState('');
+  const [actionDate, setActionDate] = useState('');
+  const [actionDescription, setActionDescription] = useState('');
+  const [actionAmountSpent, setActionAmountSpent] = useState(0);
+  const [actionVideoUrl, setActionVideoUrl] = useState('');
+  const [actionPhotos, setActionPhotos] = useState<string[]>([]);
+  const [newPhotoUrl, setNewPhotoUrl] = useState('');
+  const [isSavingAction, setIsSavingAction] = useState(false);
+
+  // Check scroll when activeTab or songs change
+  useEffect(() => {
+    const timer = setTimeout(checkScroll, 100);
+    return () => clearTimeout(timer);
+  }, [activeTab, songs]);
+
+  // Roulette settings states
+  const [sponsor1Name, setSponsor1Name] = useState('Sponsor A');
+  const [sponsor1Logo, setSponsor1Logo] = useState('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=150&h=150&fit=crop');
+  const [sponsor1Prize, setSponsor1Prize] = useState('um copo térmico personalizado');
+  const [sponsor2Name, setSponsor2Name] = useState('Sponsor B');
+  const [sponsor2Logo, setSponsor2Logo] = useState('https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=150&h=150&fit=crop');
+  const [sponsor2Prize, setSponsor2Prize] = useState('um lindo boné exclusivo');
+  const [csEstudioPrize, setCsEstudioPrize] = useState('Fone bluetooth do CS Estúdio');
+  const [artistPrize, setArtistPrize] = useState('Fone bluetooth do CS Estúdio');
+  const [isSavingRoulette, setIsSavingRoulette] = useState(false);
 
   // Song uploading states
   const [showAddForm, setShowAddForm] = useState(false);
@@ -305,6 +390,29 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onTriggerLogin }) => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [adminStatusMsg, setAdminStatusMsg] = useState('');
+  const [showStorageGuide, setShowStorageGuide] = useState(false);
+  const [songSearchQuery, setSongSearchQuery] = useState('');
+
+  const filteredSongsList = useMemo(() => {
+    if (!songSearchQuery.trim()) return songs;
+    const q = songSearchQuery.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    
+    return songs.filter(s => {
+      const nameNorm = s.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      const artistNorm = s.artist ? s.artist.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() : '';
+      const albumNorm = s.album ? s.album.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() : '';
+      const genreNorm = s.genre ? s.genre.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() : '';
+      const secondGenreNorm = s.secondGenre ? s.secondGenre.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() : '';
+      
+      return (
+        nameNorm.includes(q) ||
+        artistNorm.includes(q) ||
+        albumNorm.includes(q) ||
+        genreNorm.includes(q) ||
+        secondGenreNorm.includes(q)
+      );
+    });
+  }, [songs, songSearchQuery]);
 
   // Firebase Storage Upload Handlers
   const handleUploadAudio = async (file: File) => {
@@ -400,6 +508,175 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onTriggerLogin }) => {
 
     return () => unsub();
   }, []);
+
+  // Fetch roulette configuration in real-time
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, 'roulette', 'config'), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.sponsor1Name) setSponsor1Name(data.sponsor1Name);
+        if (data.sponsor1Logo) setSponsor1Logo(data.sponsor1Logo);
+        if (data.sponsor1Prize) setSponsor1Prize(data.sponsor1Prize);
+        if (data.sponsor2Name) setSponsor2Name(data.sponsor2Name);
+        if (data.sponsor2Logo) setSponsor2Logo(data.sponsor2Logo);
+        if (data.sponsor2Prize) setSponsor2Prize(data.sponsor2Prize);
+        if (data.csEstudioPrize) setCsEstudioPrize(data.csEstudioPrize);
+        if (data.artistPrize) setArtistPrize(data.artistPrize);
+      }
+    }, (error) => {
+      console.warn("Error fetching roulette config:", error);
+    });
+
+    return () => unsub();
+  }, []);
+
+  const handleSaveRouletteConfig = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingRoulette(true);
+    try {
+      await setDoc(doc(db, 'roulette', 'config'), {
+        sponsor1Name,
+        sponsor1Logo,
+        sponsor1Prize,
+        sponsor2Name,
+        sponsor2Logo,
+        sponsor2Prize,
+        csEstudioPrize,
+        artistPrize,
+        updatedAt: new Date().toISOString()
+      });
+      setAdminStatusMsg('Configuração da roleta salva com sucesso!');
+    } catch (err: any) {
+      console.error("Error saving roulette config:", err);
+      setAdminStatusMsg('Erro ao salvar configuração da roleta: ' + err.message);
+    } finally {
+      setIsSavingRoulette(false);
+    }
+  };
+
+  // Subscribe to CS do Bem stats and actions
+  useEffect(() => {
+    const unsubStats = onSnapshot(doc(db, 'csdobem_stats', 'global'), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.totalRaised !== undefined) setAdminTotalRaised(data.totalRaised);
+        if (data.instagramUrl) setAdminInstagramUrl(data.instagramUrl);
+        if (data.tiktokUrl) setAdminTiktokUrl(data.tiktokUrl);
+        if (data.youtubeUrl) setAdminYoutubeUrl(data.youtubeUrl);
+      }
+    });
+
+    const unsubActions = onSnapshot(collection(db, 'csdobem_actions'), (querySnapshot) => {
+      const list: CsDoBemAction[] = [];
+      querySnapshot.forEach((docSnap) => {
+        list.push(docSnap.data() as CsDoBemAction);
+      });
+      list.sort((a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime());
+      setCsDoBemActions(list);
+    });
+
+    return () => {
+      unsubStats();
+      unsubActions();
+    };
+  }, []);
+
+  const handleSaveCsDoBemStats = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingCsDoBemStats(true);
+    try {
+      await setDoc(doc(db, 'csdobem_stats', 'global'), {
+        id: 'global',
+        totalRaised: Number(adminTotalRaised),
+        instagramUrl: adminInstagramUrl,
+        tiktokUrl: adminTiktokUrl,
+        youtubeUrl: adminYoutubeUrl,
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+      setAdminStatusMsg('Estatísticas do CS do Bem salvas com sucesso!');
+    } catch (err: any) {
+      console.error("Error saving CS do Bem stats:", err);
+      setAdminStatusMsg('Erro ao salvar estatísticas: ' + err.message);
+    } finally {
+      setIsSavingCsDoBemStats(false);
+    }
+  };
+
+  const handleOpenAddAction = () => {
+    setEditingAction(null);
+    setActionTitle('');
+    setActionDate(new Date().toLocaleDateString('pt-BR'));
+    setActionDescription('');
+    setActionAmountSpent(0);
+    setActionVideoUrl('');
+    setActionPhotos([]);
+    setNewPhotoUrl('');
+    setShowActionForm(true);
+  };
+
+  const handleOpenEditAction = (action: CsDoBemAction) => {
+    setEditingAction(action);
+    setActionTitle(action.title);
+    setActionDate(action.date);
+    setActionDescription(action.description);
+    setActionAmountSpent(action.amountSpent);
+    setActionVideoUrl(action.videoUrl || '');
+    setActionPhotos(action.photos || []);
+    setNewPhotoUrl('');
+    setShowActionForm(true);
+  };
+
+  const handleSaveAction = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!actionTitle || !actionDate) {
+      alert("Título e Data são obrigatórios.");
+      return;
+    }
+    setIsSavingAction(true);
+    try {
+      const actionId = editingAction ? editingAction.id : `act_${Date.now()}`;
+      const payload: CsDoBemAction = {
+        id: actionId,
+        title: actionTitle,
+        date: actionDate,
+        description: actionDescription,
+        amountSpent: Number(actionAmountSpent),
+        photos: actionPhotos,
+        videoUrl: actionVideoUrl,
+        createdAt: editingAction ? (editingAction.createdAt || new Date().toISOString()) : new Date().toISOString()
+      };
+      await setDoc(doc(db, 'csdobem_actions', actionId), payload);
+      setAdminStatusMsg(editingAction ? 'Ação social editada com sucesso!' : 'Ação social adicionada com sucesso!');
+      setShowActionForm(false);
+      setEditingAction(null);
+    } catch (err: any) {
+      console.error("Error saving social action:", err);
+      setAdminStatusMsg('Erro ao salvar ação social: ' + err.message);
+    } finally {
+      setIsSavingAction(false);
+    }
+  };
+
+  const handleDeleteAction = async (actionId: string) => {
+    if (!confirm("Deseja realmente excluir esta ação social definitivamente?")) return;
+    try {
+      await deleteDoc(doc(db, 'csdobem_actions', actionId));
+      setAdminStatusMsg('Ação social excluída com sucesso!');
+    } catch (err: any) {
+      console.error("Error deleting social action:", err);
+      setAdminStatusMsg('Erro ao excluir ação social: ' + err.message);
+    }
+  };
+
+  const handleAddPhotoUrl = () => {
+    if (!newPhotoUrl) return;
+    setActionPhotos([...actionPhotos, newPhotoUrl]);
+    setNewPhotoUrl('');
+  };
+
+  const handleRemovePhotoUrl = (idx: number) => {
+    setActionPhotos(actionPhotos.filter((_, i) => i !== idx));
+  };
 
   const handleOpenAdd = () => {
     setEditingSong(null);
@@ -635,25 +912,68 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onTriggerLogin }) => {
         </div>
       </div>
 
-      {/* Nav Tabs */}
-      <div className="flex border-b border-[#1F1F22]">
-        {(['musicas', 'licenciamento', 'estatisticas'] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-5 py-3 text-xs font-bold uppercase tracking-wider relative transition ${
-              activeTab === tab ? 'text-white font-extrabold' : 'text-[#71717A] hover:text-[#D4D4D8]'
-            }`}
-          >
-            {tab}
-            {activeTab === tab && (
-              <motion.div 
-                layoutId="admin-active-bar" 
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#9D50BB]" 
-              />
-            )}
-          </button>
-        ))}
+      {/* Nav Tabs with side scroll arrows on Mobile */}
+      <div className="relative flex items-center border-b border-[#1F1F22] select-none">
+        {/* Left scroll arrow (mobile only) */}
+        {canScrollLeft && (
+          <div className="md:hidden absolute left-0 top-0 bottom-0 bg-gradient-to-r from-[#050505] via-[#050505]/90 to-transparent flex items-center pr-6 pl-1 z-10">
+            <button 
+              onClick={() => {
+                if (tabsContainerRef.current) {
+                  tabsContainerRef.current.scrollBy({ left: -100, behavior: 'smooth' });
+                }
+              }}
+              className="p-1.5 rounded-full bg-[#18181B]/95 border border-[#1F1F22] text-[#9D50BB] hover:text-[#00E5FF] hover:bg-[#1F1F22] active:scale-90 transition shadow-md flex items-center justify-center cursor-pointer"
+              title="Voltar guias"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+
+        {/* Tab List */}
+        <div 
+          ref={tabsContainerRef}
+          className="flex-1 flex overflow-x-auto scrollbar-none whitespace-nowrap scroll-smooth md:overflow-x-visible md:flex-wrap"
+        >
+          {(['musicas', 'licenciamento', 'roleta', 'estatisticas', 'csdobem'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-5 py-3 text-xs font-bold uppercase tracking-wider relative transition shrink-0 ${
+                activeTab === tab ? 'text-white font-extrabold' : 'text-[#71717A] hover:text-[#D4D4D8]'
+              }`}
+            >
+              {tab === 'musicas' ? 'Músicas' : 
+               tab === 'licenciamento' ? 'Licenças / Apoios' : 
+               tab === 'roleta' ? 'Roleta Premiada' : 
+               tab === 'estatisticas' ? 'Estatísticas' : 'CS do Bem'}
+              {activeTab === tab && (
+                <motion.div 
+                  layoutId="admin-active-bar" 
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#9D50BB]" 
+                />
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Right scroll arrow (mobile only) */}
+        {canScrollRight && (
+          <div className="md:hidden absolute right-0 top-0 bottom-0 bg-gradient-to-l from-[#050505] via-[#050505]/90 to-transparent flex items-center pl-6 pr-1 z-10">
+            <button 
+              onClick={() => {
+                if (tabsContainerRef.current) {
+                  tabsContainerRef.current.scrollBy({ left: 100, behavior: 'smooth' });
+                }
+              }}
+              className="p-1.5 rounded-full bg-[#18181B]/95 border border-[#1F1F22] text-[#9D50BB] hover:text-[#00E5FF] hover:bg-[#1F1F22] active:scale-90 transition shadow-md flex items-center justify-center cursor-pointer"
+              title="Avançar guias"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Tab content view switching */}
@@ -661,11 +981,38 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onTriggerLogin }) => {
         {/* --- TABS: MUSIC LIST AND UPLOADING --- */}
         {activeTab === 'musicas' && (
           <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-base font-bold text-[#F4F4F5]">Catálogo de Reprodução</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-neutral-900/30 p-2 rounded-2xl border border-[#1F1F22]/50">
+              <div className="flex items-center justify-between sm:justify-start gap-4 flex-1">
+                <h2 className="text-base font-black text-[#F4F4F5] font-sans tracking-tight shrink-0">
+                  <span className="hidden sm:inline">Catálogo de </span>Reprodução
+                </h2>
+                
+                {/* Lupa de busca por nome da musica e estilo */}
+                <div className="relative flex items-center bg-[#18181B] border border-[#1F1F22] focus-within:border-[#00E5FF]/50 text-white rounded-xl px-3 py-1.5 w-full max-w-[180px] sm:max-w-[240px] shadow-sm transition-all duration-300">
+                  <Search className="w-3.5 h-3.5 text-[#00E5FF] shrink-0 stroke-[2.5px]" />
+                  <div className="h-4 w-[1px] bg-[#27272A] mx-2 shrink-0" />
+                  <input
+                    type="text"
+                    value={songSearchQuery}
+                    onChange={(e) => setSongSearchQuery(e.target.value)}
+                    placeholder="Música ou Estilo"
+                    className="bg-transparent text-white font-extrabold text-[11px] placeholder-[#71717A] focus:outline-none w-full font-sans cursor-text"
+                  />
+                  {songSearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSongSearchQuery('')}
+                      className="text-[#71717A] hover:text-white transition ml-1 cursor-pointer shrink-0"
+                    >
+                      <X className="w-3.5 h-3.5 stroke-[3px]" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
               <button 
                 onClick={handleOpenAdd}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#9D50BB] hover:bg-[#9D50BB]/95 text-xs font-extrabold text-black shadow-lg shadow-[#9D50BB]/20 active:scale-95 transition"
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#00E5FF] hover:bg-[#00E5FF]/90 text-xs font-extrabold text-black shadow-lg shadow-[#00E5FF]/10 active:scale-95 transition shrink-0 cursor-pointer"
               >
                 <Plus className="w-4 h-4" /> Cadastrar Música
               </button>
@@ -681,43 +1028,64 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onTriggerLogin }) => {
                   className="bg-[#121214] border border-[#1F1F22] p-5 md:p-6 rounded-xl space-y-4 shadow-2xl"
                 >
                   <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    <Music className="w-4.5 h-4.5 text-[#9D50BB]" />
+                    <Music className="w-4.5 h-4.5 text-[#00E5FF]" />
                     {editingSong ? 'Editar Informações da Trilha' : 'Efetuar Cadastro de Nova Trilha original'}
                   </h3>
 
                   <form onSubmit={handleSaveSongForm} className="space-y-4">
                     {/* Guia de Solução para Firebase Storage */}
                     <div className="bg-[#1D120B] border border-orange-500/30 rounded-2xl p-4 text-xs text-orange-200/95 space-y-2 leading-relaxed">
-                      <p className="font-extrabold flex items-center gap-2 text-sm text-orange-300">
-                        <ShieldAlert className="w-4 h-4 text-orange-400 shrink-0" />
-                        Upload travado em 0%? Como ativar o Firebase Storage gratuito em 1 minuto:
-                      </p>
-                      <p>
-                        Por padrão, o <strong>Firebase Storage</strong> não vem ativado de fábrica no projeto do Firebase. Se você nunca clicou nele no painel do Firebase, o navegador ficará tentando fazer o upload indefinidamente (ficando em 0% ou com erro).
-                      </p>
-                      <p className="font-semibold text-white">
-                        Siga estes passos simples para consertar:
-                      </p>
-                      <ul className="list-decimal pl-4.5 space-y-1">
-                        <li>
-                          Acesse diretamente o console de Storage do seu projeto:{" "}
-                          <a 
-                            href="https://console.firebase.google.com/project/gen-lang-client-0472481079/storage" 
-                            target="_blank" 
-                            rel="noopener noreferrer" 
-                            className="underline text-[#00E5FF] font-black hover:text-[#00E5FF]/80 transition inline-flex items-center gap-0.5"
-                          >
-                            Ir para o Firebase Storage <ExternalLink className="w-3 h-3 inline" />
-                          </a>
-                        </li>
-                        <li>Clique no botão azul <strong>"Começar" (Get Started)</strong>.</li>
-                        <li>Escolha a primeira opção <strong>"Iniciar no modo de teste"</strong> (desta forma, as regras de segurança permitirão gravações e uploads de arquivos do aplicativo).</li>
-                        <li>Avance clicando em <strong>Próximo</strong> e depois em <strong>Concluído</strong> para criar o bucket de arquivos.</li>
-                        <li>Uma vez concluído, volte aqui de imediato e tente fazer o upload novamente. Ele carregará com sucesso a 100%!</li>
-                      </ul>
-                      <p className="text-[10px] text-[#A1A1AA]/80 italic pt-1 border-t border-[#27272A]">
-                        Dica Extra: Enquanto você não ativa o Storage, se quiser experimentar a música no player imediatamente, você pode simplesmente digitar ou colar qualquer link direto de MP3 válido (ou usar o link pré-carregado) no campo "Link do áudio ativo" ao final do formulário!
-                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setShowStorageGuide(!showStorageGuide)}
+                        className="w-full flex items-center justify-between font-extrabold text-sm text-orange-300 focus:outline-none cursor-pointer"
+                      >
+                        <span className="flex items-center gap-2 text-left">
+                          <ShieldAlert className="w-4 h-4 text-orange-400 shrink-0" />
+                          Upload travado em 0%? Como ativar o Firebase Storage gratuito em 1 minuto
+                        </span>
+                        {showStorageGuide ? (
+                          <ChevronUp className="w-4.5 h-4.5 text-orange-400 shrink-0" />
+                        ) : (
+                          <ChevronDown className="w-4.5 h-4.5 text-orange-400 shrink-0" />
+                        )}
+                      </button>
+
+                      {showStorageGuide && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          transition={{ duration: 0.2 }}
+                          className="space-y-2 mt-2 pt-2 border-t border-orange-500/10"
+                        >
+                          <p>
+                            Por padrão, o <strong>Firebase Storage</strong> não vem ativado de fábrica no projeto do Firebase. Se você nunca clicou nele no painel do Firebase, o navegador ficará tentando fazer o upload indefinidamente (ficando em 0% ou com erro).
+                          </p>
+                          <p className="font-semibold text-white">
+                            Siga estes passos simples para consertar:
+                          </p>
+                          <ul className="list-decimal pl-4.5 space-y-1">
+                            <li>
+                              Acesse diretamente o console de Storage do seu projeto:{" "}
+                              <a 
+                                href="https://console.firebase.google.com/project/gen-lang-client-0472481079/storage" 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="underline text-[#00E5FF] font-black hover:text-[#00E5FF]/80 transition inline-flex items-center gap-0.5"
+                              >
+                                Ir para o Firebase Storage <ExternalLink className="w-3 h-3 inline" />
+                              </a>
+                            </li>
+                            <li>Clique no botão azul <strong>"Começar" (Get Started)</strong>.</li>
+                            <li>Escolha a primeira opção <strong>"Iniciar no modo de teste"</strong> (desta forma, as regras de segurança permitirão gravações e uploads de arquivos do aplicativo).</li>
+                            <li>Avance clicando em <strong>Próximo</strong> e depois em <strong>Concluído</strong> para criar o bucket de arquivos.</li>
+                            <li>Uma vez concluído, volte aqui de imediato e tente fazer o upload novamente. Ele carregará com sucesso a 100%!</li>
+                          </ul>
+                          <p className="text-[10px] text-[#A1A1AA]/80 italic pt-1 border-t border-[#27272A]">
+                            Dica Extra: Enquanto você não ativa o Storage, se quiser experimentar a música no player imediatamente, você pode simplesmente digitar ou colar qualquer link direto de MP3 válido (ou usar o link pré-carregado) no campo "Link do áudio ativo" ao final do formulário!
+                          </p>
+                        </motion.div>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -988,8 +1356,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onTriggerLogin }) => {
                 <div className="py-12 text-center text-[#71717A] text-xs font-medium">
                   Nenhuma música encontrada no catálogo.
                 </div>
+              ) : filteredSongsList.length === 0 ? (
+                <div className="py-12 text-center text-[#71717A] text-xs font-medium">
+                  Nenhuma música encontrada para os critérios de busca "{songSearchQuery}".
+                </div>
               ) : (
-                songs.map((song) => (
+                filteredSongsList.map((song) => (
                   <div key={song.id} className="flex items-center gap-3 p-3 hover:bg-[#27272A]/40 transition group">
                     <img 
                       src={song.coverUrl} 
@@ -1219,6 +1591,502 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onTriggerLogin }) => {
             </div>
           </div>
         )}
+
+        {activeTab === 'roleta' && (
+          <div className="space-y-6">
+            <div className="bg-neutral-900/30 p-4 rounded-2xl border border-[#1F1F22]/50 flex items-center justify-between">
+              <div>
+                <h2 className="text-base font-black text-[#F4F4F5] font-sans tracking-tight">
+                  Configurações da Roleta de Prêmios
+                </h2>
+                <p className="text-xs text-[#71717A] font-semibold">
+                  Personalize os patrocinadores, logos e prêmios que serão sorteados após o voto computado.
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSaveRouletteConfig} className="bg-[#121214] border border-[#1F1F22] p-6 rounded-xl space-y-6 shadow-2xl">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                {/* Patrocinador 1 */}
+                <div className="space-y-4 p-4 bg-[#18181B] border border-[#1F1F22] rounded-xl">
+                  <h3 className="text-xs uppercase tracking-widest text-[#00E5FF] font-black">Patrocinador 1</h3>
+                  
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-[#A1A1AA] font-bold">Nome da Empresa</label>
+                    <input
+                      type="text"
+                      required
+                      value={sponsor1Name}
+                      onChange={(e) => setSponsor1Name(e.target.value)}
+                      placeholder="Ex: Coca-Cola"
+                      className="w-full px-3 py-1.5 bg-[#131315] border border-[#27272A] focus:border-[#00E5FF] focus:outline-none rounded-lg text-xs text-white placeholder-[#71717A] transition"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-[#A1A1AA] font-bold">URL do Logo</label>
+                    <input
+                      type="text"
+                      required
+                      value={sponsor1Logo}
+                      onChange={(e) => setSponsor1Logo(e.target.value)}
+                      placeholder="https://..."
+                      className="w-full px-3 py-1.5 bg-[#131315] border border-[#27272A] focus:border-[#00E5FF] focus:outline-none rounded-lg text-xs text-white placeholder-[#71717A] transition font-mono"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-[#A1A1AA] font-bold">Descrição do Prêmio</label>
+                    <input
+                      type="text"
+                      required
+                      value={sponsor1Prize}
+                      onChange={(e) => setSponsor1Prize(e.target.value)}
+                      placeholder="Ex: um copo térmico personalizado"
+                      className="w-full px-3 py-1.5 bg-[#131315] border border-[#27272A] focus:border-[#00E5FF] focus:outline-none rounded-lg text-xs text-white placeholder-[#71717A] transition"
+                    />
+                  </div>
+                </div>
+
+                {/* Patrocinador 2 */}
+                <div className="space-y-4 p-4 bg-[#18181B] border border-[#1F1F22] rounded-xl">
+                  <h3 className="text-xs uppercase tracking-widest text-[#9D50BB] font-black">Patrocinador 2</h3>
+                  
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-[#A1A1AA] font-bold">Nome da Empresa</label>
+                    <input
+                      type="text"
+                      required
+                      value={sponsor2Name}
+                      onChange={(e) => setSponsor2Name(e.target.value)}
+                      placeholder="Ex: Heineken"
+                      className="w-full px-3 py-1.5 bg-[#131315] border border-[#27272A] focus:border-[#00E5FF] focus:outline-none rounded-lg text-xs text-white placeholder-[#71717A] transition"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-[#A1A1AA] font-bold">URL do Logo</label>
+                    <input
+                      type="text"
+                      required
+                      value={sponsor2Logo}
+                      onChange={(e) => setSponsor2Logo(e.target.value)}
+                      placeholder="https://..."
+                      className="w-full px-3 py-1.5 bg-[#131315] border border-[#27272A] focus:border-[#00E5FF] focus:outline-none rounded-lg text-xs text-white placeholder-[#71717A] transition font-mono"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] text-[#A1A1AA] font-bold">Descrição do Prêmio</label>
+                    <input
+                      type="text"
+                      required
+                      value={sponsor2Prize}
+                      onChange={(e) => setSponsor2Prize(e.target.value)}
+                      placeholder="Ex: um lindo boné exclusivo"
+                      className="w-full px-3 py-1.5 bg-[#131315] border border-[#27272A] focus:border-[#00E5FF] focus:outline-none rounded-lg text-xs text-white placeholder-[#71717A] transition"
+                    />
+                  </div>
+                </div>
+
+                {/* CS Music e Artista */}
+                <div className="space-y-4 p-4 bg-[#18181B] border border-[#1F1F22] rounded-xl md:col-span-2">
+                  <h3 className="text-xs uppercase tracking-widest text-[#E4E4E7] font-black">Prêmios Especiais</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-[#A1A1AA] font-bold">Prêmio do CS Music</label>
+                      <input
+                        type="text"
+                        required
+                        value={csEstudioPrize}
+                        onChange={(e) => setCsEstudioPrize(e.target.value)}
+                        placeholder="Ex: Fone bluetooth do CS Music"
+                        className="w-full px-3 py-1.5 bg-[#131315] border border-[#27272A] focus:border-[#00E5FF] focus:outline-none rounded-lg text-xs text-white placeholder-[#71717A] transition"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-[#A1A1AA] font-bold">Prêmio do Artista Votado</label>
+                      <input
+                        type="text"
+                        required
+                        value={artistPrize}
+                        onChange={(e) => setArtistPrize(e.target.value)}
+                        placeholder="Ex: Fone bluetooth do CS Music"
+                        className="w-full px-3 py-1.5 bg-[#131315] border border-[#27272A] focus:border-[#00E5FF] focus:outline-none rounded-lg text-xs text-white placeholder-[#71717A] transition"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <div className="flex items-center justify-end">
+                <button
+                  type="submit"
+                  disabled={isSavingRoulette}
+                  className="px-5 py-2.5 rounded-xl bg-[#00E5FF] hover:bg-[#00E5FF]/90 text-xs font-extrabold text-black shadow-lg shadow-[#00E5FF]/10 active:scale-95 transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  {isSavingRoulette ? 'Salvando...' : 'Salvar Configurações da Roleta'}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* --- TABS: CS DO BEM SOCIAL PROJECT --- */}
+        {activeTab === 'csdobem' && (
+          <div className="space-y-6">
+            <div className="bg-neutral-900/30 p-4 rounded-2xl border border-[#1F1F22]/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-base font-black text-[#F4F4F5] flex items-center gap-2 tracking-tight">
+                  <Heart className="w-5 h-5 text-emerald-400 fill-emerald-500/10 animate-pulse" />
+                  Gerenciador do Projeto Social - CS do Bem
+                </h2>
+                <p className="text-xs text-[#71717A] font-semibold">
+                  A transparência é o maior patrimônio. Controle a arrecadação, destinação de recursos e o feed de ações sociais.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleOpenAddAction}
+                className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-xs font-black text-white flex items-center gap-1.5 shadow-lg shadow-emerald-500/10 cursor-pointer"
+              >
+                <Plus className="w-4 h-4" /> Nova Ação Social
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* GLOBAL METRICS & NETWORKS (LEFT) */}
+              <div className="lg:col-span-5 bg-[#18181B] border border-[#1F1F22] rounded-xl p-6 space-y-5 shadow-xl">
+                <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                  <Sliders className="w-4 h-4 text-emerald-400" /> Métricas e Redes
+                </h3>
+
+                <form onSubmit={handleSaveCsDoBemStats} className="space-y-4">
+                  {/* Total Raised Input */}
+                  <div className="space-y-1.5 text-left">
+                    <label className="text-[10px] text-[#A1A1AA] font-bold block uppercase tracking-wider">Total Arrecadado (R$)</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <span className="text-[#71717A] text-xs font-mono font-bold">R$</span>
+                      </div>
+                      <input
+                        type="number"
+                        step="0.01"
+                        required
+                        value={adminTotalRaised}
+                        onChange={(e) => setAdminTotalRaised(Number(e.target.value))}
+                        className="w-full pl-9 pr-3 py-2 bg-[#131315] border border-[#27272A] focus:border-emerald-500 focus:outline-none rounded-xl text-xs font-semibold text-white font-mono transition"
+                      />
+                    </div>
+                    
+                    {/* Auto aggregate button */}
+                    {autoTotalPaidLicensing > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setAdminTotalRaised(autoTotalPaidLicensing)}
+                        className="mt-1 text-[10px] font-black uppercase text-[#00E5FF] hover:text-[#00E5FF]/80 transition flex items-center gap-1 cursor-pointer"
+                      >
+                        <RefreshCw className="w-3 h-3" />
+                        Sincronizar com Licenças Pagas (R$ {autoTotalPaidLicensing.toLocaleString('pt-BR', { minimumFractionDigits: 2 })})
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Instagram URL */}
+                  <div className="space-y-1.5 text-left">
+                    <label className="text-[10px] text-[#A1A1AA] font-bold block uppercase tracking-wider">Instagram (Vídeos do Projeto)</label>
+                    <input
+                      type="url"
+                      required
+                      value={adminInstagramUrl}
+                      onChange={(e) => setAdminInstagramUrl(e.target.value)}
+                      placeholder="https://instagram.com/seu-perfil"
+                      className="w-full px-3 py-2 bg-[#131315] border border-[#27272A] focus:border-[#00E5FF] focus:outline-none rounded-xl text-xs text-white placeholder-[#71717A] transition"
+                    />
+                  </div>
+
+                  {/* YouTube URL */}
+                  <div className="space-y-1.5 text-left">
+                    <label className="text-[10px] text-[#A1A1AA] font-bold block uppercase tracking-wider">YouTube (Vídeos de Entregas)</label>
+                    <input
+                      type="url"
+                      required
+                      value={adminYoutubeUrl}
+                      onChange={(e) => setAdminYoutubeUrl(e.target.value)}
+                      placeholder="https://youtube.com/seu-canal"
+                      className="w-full px-3 py-2 bg-[#131315] border border-[#27272A] focus:border-[#00E5FF] focus:outline-none rounded-xl text-xs text-white placeholder-[#71717A] transition"
+                    />
+                  </div>
+
+                  {/* TikTok URL */}
+                  <div className="space-y-1.5 text-left">
+                    <label className="text-[10px] text-[#A1A1AA] font-bold block uppercase tracking-wider">TikTok (Bastidores)</label>
+                    <input
+                      type="url"
+                      required
+                      value={adminTiktokUrl}
+                      onChange={(e) => setAdminTiktokUrl(e.target.value)}
+                      placeholder="https://tiktok.com/@seu-usuario"
+                      className="w-full px-3 py-2 bg-[#131315] border border-[#27272A] focus:border-[#00E5FF] focus:outline-none rounded-xl text-xs text-white placeholder-[#71717A] transition"
+                    />
+                  </div>
+
+                  <div className="pt-2">
+                    <button
+                      type="submit"
+                      disabled={isSavingCsDoBemStats}
+                      className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-xs font-black text-white shadow-lg active:scale-95 transition flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      {isSavingCsDoBemStats ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" /> Salvando...
+                        </>
+                      ) : (
+                        'Salvar Métricas & Redes'
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* ACTIONS LIST (RIGHT) */}
+              <div className="lg:col-span-7 space-y-4">
+                <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-emerald-400" /> Ações Cadastradas ({csDoBemActions.length})
+                </h3>
+
+                {csDoBemActions.length === 0 ? (
+                  <div className="p-8 text-center rounded-xl bg-[#18181B] border border-[#1F1F22] text-[#71717A] text-xs font-semibold">
+                    Nenhuma ação cadastrada. Use o botão "Nova Ação Social" acima para criar.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {csDoBemActions.map((act) => (
+                      <div 
+                        key={act.id}
+                        className="p-4 bg-[#18181B] border border-[#1F1F22] rounded-xl flex items-start justify-between gap-4 shadow-md hover:border-neutral-700 transition"
+                      >
+                        <div className="space-y-1.5 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-bold font-mono text-[#00E5FF] bg-[#00E5FF]/10 border border-[#00E5FF]/20 px-1.5 py-0.5 rounded">
+                              {act.date}
+                            </span>
+                            <span className="text-[10px] font-bold font-mono text-emerald-400 bg-emerald-500/5 border border-emerald-500/15 px-1.5 py-0.5 rounded">
+                              R$ {act.amountSpent.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                            </span>
+                          </div>
+                          <h4 className="text-xs font-extrabold text-white truncate max-w-md">{act.title}</h4>
+                          <p className="text-[11px] text-neutral-400 line-clamp-2 max-w-md font-semibold leading-relaxed">{act.description}</p>
+                          {act.photos && act.photos.length > 0 && (
+                            <div className="text-[9px] text-[#A1A1AA] font-bold flex items-center gap-1 font-mono">
+                              <ImageIcon className="w-3 h-3 text-emerald-500" /> {act.photos.length} fotos anexadas
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditAction(act)}
+                            className="p-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-[#00E5FF] active:scale-90 transition cursor-pointer"
+                            title="Editar Ação"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteAction(act.id)}
+                            className="p-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-red-500 active:scale-90 transition cursor-pointer"
+                            title="Excluir Ação"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* --- FORM OVERLAY MODAL FOR SOCIAL ACTIONS (ADD / EDIT) --- */}
+        <AnimatePresence>
+          {showActionForm && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="relative w-full max-w-xl bg-[#18181B] border border-[#27272A] rounded-2xl p-6 shadow-2xl space-y-5 text-white max-h-[90vh] overflow-y-auto text-left"
+              >
+                <div className="flex items-center justify-between border-b border-[#27272A] pb-3">
+                  <h3 className="text-sm font-black text-white flex items-center gap-2">
+                    <Heart className="w-5 h-5 text-emerald-400 fill-emerald-500/10" />
+                    {editingAction ? 'Editar Ação Social' : 'Nova Ação Social'}
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowActionForm(false);
+                      setEditingAction(null);
+                    }}
+                    className="p-1 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-400 hover:text-white transition cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <form onSubmit={handleSaveAction} className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Title */}
+                    <div className="space-y-1.5 text-left">
+                      <label className="text-[10px] text-[#A1A1AA] font-bold uppercase tracking-wider block">Título da Ação</label>
+                      <input
+                        type="text"
+                        required
+                        value={actionTitle}
+                        onChange={(e) => setActionTitle(e.target.value)}
+                        placeholder="Ex: Entrega de Cobertores de Inverno"
+                        className="w-full px-3 py-2 bg-[#131315] border border-[#27272A] focus:border-emerald-500 focus:outline-none rounded-xl text-xs text-white font-semibold placeholder-[#71717A] transition"
+                      />
+                    </div>
+
+                    {/* Date */}
+                    <div className="space-y-1.5 text-left">
+                      <label className="text-[10px] text-[#A1A1AA] font-bold uppercase tracking-wider block">Data da Ação</label>
+                      <input
+                        type="text"
+                        required
+                        value={actionDate}
+                        onChange={(e) => setActionDate(e.target.value)}
+                        placeholder="Ex: 12/07/2026"
+                        className="w-full px-3 py-2 bg-[#131315] border border-[#27272A] focus:border-emerald-500 focus:outline-none rounded-xl text-xs text-white font-semibold font-mono placeholder-[#71717A] transition"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <div className="space-y-1.5 text-left">
+                    <label className="text-[10px] text-[#A1A1AA] font-bold uppercase tracking-wider block">Descrição Detalhada</label>
+                    <textarea
+                      required
+                      rows={3}
+                      value={actionDescription}
+                      onChange={(e) => setActionDescription(e.target.value)}
+                      placeholder="Descreva a ação que foi realizada, como as pessoas receberam, os sentimentos, etc. (Sem citar marmitas ou cobertores se preferir um tom natural)"
+                      className="w-full px-3 py-2 bg-[#131315] border border-[#27272A] focus:border-emerald-500 focus:outline-none rounded-xl text-xs text-white placeholder-[#71717A] transition leading-relaxed resize-none"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Amount Spent */}
+                    <div className="space-y-1.5 text-left">
+                      <label className="text-[10px] text-[#A1A1AA] font-bold uppercase tracking-wider block">Recursos Destinados (R$)</label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <span className="text-[#71717A] text-xs font-mono font-bold">R$</span>
+                        </div>
+                        <input
+                          type="number"
+                          step="0.01"
+                          required
+                          value={actionAmountSpent}
+                          onChange={(e) => setActionAmountSpent(Number(e.target.value))}
+                          className="w-full pl-9 pr-3 py-2 bg-[#131315] border border-[#27272A] focus:border-emerald-500 focus:outline-none rounded-xl text-xs font-semibold text-white font-mono transition"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Video URL (Optional) */}
+                    <div className="space-y-1.5 text-left">
+                      <label className="text-[10px] text-[#A1A1AA] font-bold uppercase tracking-wider block">Link do Vídeo (Instagram, TikTok, YouTube)</label>
+                      <input
+                        type="url"
+                        value={actionVideoUrl}
+                        onChange={(e) => setActionVideoUrl(e.target.value)}
+                        placeholder="Ex: https://instagram.com/reel/xyz"
+                        className="w-full px-3 py-2 bg-[#131315] border border-[#27272A] focus:border-emerald-500 focus:outline-none rounded-xl text-xs text-white font-semibold placeholder-[#71717A] transition"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Photos Addition */}
+                  <div className="space-y-2.5 text-left border-t border-[#27272A] pt-3">
+                    <label className="text-[10px] text-[#A1A1AA] font-bold uppercase tracking-wider block">Fotos da Ação (URLs de imagens)</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="url"
+                        value={newPhotoUrl}
+                        onChange={(e) => setNewPhotoUrl(e.target.value)}
+                        placeholder="Cole a URL da foto (Ex: link do Unsplash ou do drive público)"
+                        className="flex-1 px-3 py-2 bg-[#131315] border border-[#27272A] focus:border-emerald-500 focus:outline-none rounded-xl text-xs text-white placeholder-[#71717A] transition"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddPhotoUrl}
+                        className="px-4 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 active:scale-95 text-xs font-bold text-white transition cursor-pointer"
+                      >
+                        Adicionar
+                      </button>
+                    </div>
+
+                    {/* Photo Previews */}
+                    {actionPhotos.length > 0 && (
+                      <div className="grid grid-cols-4 gap-2 pt-1.5">
+                        {actionPhotos.map((photo, idx) => (
+                          <div key={idx} className="aspect-square relative rounded-lg overflow-hidden bg-neutral-950 border border-[#27272A]">
+                            <img src={photo} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                            <button
+                              type="button"
+                              onClick={() => handleRemovePhotoUrl(idx)}
+                              className="absolute top-1 right-1 p-1 rounded-full bg-black/75 hover:bg-red-600 text-white transition cursor-pointer"
+                              title="Remover foto"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Submission Row */}
+                  <div className="flex justify-end gap-2 border-t border-[#27272A] pt-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowActionForm(false);
+                        setEditingAction(null);
+                      }}
+                      className="px-4 py-2 rounded-xl text-xs font-bold text-neutral-400 hover:text-white hover:bg-neutral-800 transition active:scale-95 cursor-pointer"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isSavingAction}
+                      className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-xs font-black text-white shadow-lg active:scale-95 transition flex items-center gap-1.5 cursor-pointer"
+                    >
+                      {isSavingAction ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" /> Salvando...
+                        </>
+                      ) : (
+                        'Salvar Ação Social'
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Custom Delete Confirmation Modal */}
@@ -1248,7 +2116,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onTriggerLogin }) => {
                 <div className="space-y-1.5 flex-1">
                   <h3 className="text-lg font-bold text-white">Remover Música?</h3>
                   <p className="text-xs text-neutral-400 leading-relaxed font-semibold">
-                    Você está prestes a remover <strong className="text-white italic">"{songToDelete.name}"</strong> do catálogo do CS Estúdio definitivamente.
+                    Você está prestes a remover <strong className="text-white italic">"{songToDelete.name}"</strong> do catálogo do CS Music definitivamente.
                   </p>
                   <span className="inline-block text-[10px] text-red-400 font-bold bg-red-500/5 border border-red-500/10 rounded px-2 py-1 leading-none">
                     ⚠️ Atenção: Esta ação é irreversível e o arquivo não poderá ser restaurado.

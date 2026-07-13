@@ -4,6 +4,7 @@ import { HomeFeed } from './components/HomeFeed';
 import { SearchView } from './components/SearchView';
 import { FavoritesView } from './components/FavoritesView';
 import { ArtistProfile } from './components/ArtistProfile';
+import { CsDoBem } from './components/CsDoBem';
 import { AdminPanel } from './components/AdminPanel';
 import { AuthScreen } from './components/AuthScreen';
 import { MainPlayer } from './components/MainPlayer';
@@ -19,19 +20,20 @@ import {
   LogIn,
   Sliders,
   Sparkle,
-  ArrowUp
+  ArrowUp,
+  Heart as HeartIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 function CSAppContent() {
-  const [activeTab, setActiveTab] = useState<'inicio' | 'buscar' | 'biblioteca' | 'artista' | 'admin'>('inicio');
+  const [activeTab, setActiveTab] = useState<'inicio' | 'buscar' | 'biblioteca' | 'artista' | 'csdobem' | 'admin'>('inicio');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [showAuth, setShowAuth] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [authSuccessAction, setAuthSuccessAction] = useState<() => void>(() => {});
   const [showBackToTop, setShowBackToTop] = useState(false);
   
-  const { songs, playSong, userProfile, isLoadingSongs, updateQueue } = useAudio();
+  const { songs, playSong, userProfile, isLoadingSongs, updateQueue, isPlayerExpanded, isVotingModalOpen } = useAudio();
 
   // Handle scroll detection for Back to Top button
   useEffect(() => {
@@ -186,7 +188,7 @@ function CSAppContent() {
             <div>
               <h1 className="text-sm font-black tracking-tight flex items-center gap-1">
                 CS Music
-                <span className="text-[8px] font-bold px-1 py-0.2 rounded bg-[#00E5FF]/10 text-[#00E5FF] border border-[#00E5FF]/20 uppercase tracking-widest">Estúdio</span>
+                <span className="text-[8px] font-bold px-1 py-0.2 rounded bg-[#00E5FF]/10 text-[#00E5FF] border border-[#00E5FF]/20 uppercase tracking-widest">Music</span>
               </h1>
             </div>
           </button>
@@ -234,6 +236,7 @@ function CSAppContent() {
               {activeTab === 'buscar' && <SearchView />}
               {activeTab === 'biblioteca' && <FavoritesView />}
               {activeTab === 'artista' && <ArtistProfile />}
+              {activeTab === 'csdobem' && <CsDoBem />}
               {activeTab === 'admin' && (
                 <AdminPanel 
                   onTriggerLogin={() => {
@@ -290,10 +293,22 @@ function CSAppContent() {
           </button>
 
           <button 
+            id="tab-csdobem-btn"
+            onClick={() => handleTabClick('csdobem')}
+            translate="no"
+            className={`flex flex-col items-center gap-1 text-[9px] font-bold uppercase tracking-wider min-w-[45px] cursor-pointer transition notranslate ${
+              activeTab === 'csdobem' ? 'text-[#9D50BB]' : 'text-[#71717A] hover:text-[#F4F4F5]'
+            }`}
+          >
+            <HeartIcon className="w-5 h-5 shrink-0 text-red-500 fill-red-500" />
+            <span translate="no" className="whitespace-nowrap notranslate">CS do Bem</span>
+          </button>
+
+          <button 
             id="tab-artist-btn"
             onClick={() => handleTabClick('artista')}
             translate="no"
-            className={`flex flex-col items-center gap-1 text-[9px] font-bold uppercase tracking-wider min-w-[50px] cursor-pointer transition notranslate ${
+            className={`flex flex-col items-center gap-1 text-[9px] font-bold uppercase tracking-wider min-w-[45px] cursor-pointer transition notranslate ${
               activeTab === 'artista' ? 'text-[#9D50BB]' : 'text-[#71717A] hover:text-[#F4F4F5]'
             }`}
           >
@@ -325,7 +340,7 @@ function CSAppContent() {
 
         {/* BACK TO TOP FLOATING BUTTON */}
         <AnimatePresence>
-          {showBackToTop && (
+          {showBackToTop && !isPlayerExpanded && !isVotingModalOpen && (
             <motion.button
               initial={{ opacity: 0, scale: 0.8, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}

@@ -69,6 +69,35 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "fullName", "email", "phone", "songId", "songName", "purpose", "status"]
+    },
+    "CsDoBemAction": {
+      "title": "CsDoBemAction",
+      "description": "A social action performed by CS do Bem project.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique action ID" },
+        "date": { "type": "string", "description": "Date of the action" },
+        "title": { "type": "string", "description": "Title of the action" },
+        "description": { "type": "string", "description": "Detailed description of the action" },
+        "amountSpent": { "type": "number", "description": "Amount spent from donations" },
+        "photos": { "type": "array", "description": "Array of photo URLs" },
+        "videoUrl": { "type": "string", "description": "Social media video link" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "date", "title", "description", "amountSpent"]
+    },
+    "CsDoBemStats": {
+      "title": "CsDoBemStats",
+      "description": "Global statistics and links for CS do Bem project.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Global ID (usually 'global')" },
+        "totalRaised": { "type": "number", "description": "Total amount raised" },
+        "instagramUrl": { "type": "string", "description": "Instagram video link" },
+        "tiktokUrl": { "type": "string", "description": "TikTok video link" },
+        "youtubeUrl": { "type": "string", "description": "YouTube video link" }
+      },
+      "required": ["id"]
     }
   },
   "firestore": {
@@ -87,6 +116,14 @@
     "/licensing_requests/{requestId}": {
       "schema": "LicensingRequest",
       "description": "Commercial licensing application records"
+    },
+    "/csdobem_actions/{actionId}": {
+      "schema": "CsDoBemAction",
+      "description": "Social action records with descriptions and photos"
+    },
+    "/csdobem_stats/{docId}": {
+      "schema": "CsDoBemStats",
+      "description": "Global settings and metrics for the social project"
     }
   }
 }

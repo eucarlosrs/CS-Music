@@ -12,7 +12,7 @@ interface HomeFeedProps {
 }
 
 export const HomeFeed: React.FC<HomeFeedProps> = ({ onSelectCategory, activeCategory, onNavigateToTab }) => {
-  const { songs, playSong, currentSong, isPlaying, togglePlay, userProfile, likedPlaylists, customPlaylists, likedSongs } = useAudio();
+  const { songs, playSong, currentSong, isPlaying, togglePlay, userProfile, likedPlaylists, customPlaylists, likedSongs, setIsPlayerExpanded } = useAudio();
   const [selectedLicensingSong, setSelectedLicensingSong] = useState<Song | null>(null);
   const [isGenresExpanded, setIsGenresExpanded] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -51,6 +51,28 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onSelectCategory, activeCate
     return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
   };
 
+  // Helper to normalize accents and spaces for robust searching/filtering
+  const normalizeText = (text: string) => {
+    if (!text) return '';
+    return text
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+  };
+
+  // Robust genre matcher that supports accent-insensitivity, exact matching, and subgenre matching
+  const matchGenre = (songGenre: string | undefined, activeCat: string) => {
+    if (!songGenre) return false;
+    const songGenreNorm = normalizeText(songGenre);
+    const activeCatNorm = normalizeText(activeCat);
+    return (
+      songGenreNorm === activeCatNorm || 
+      songGenreNorm.includes(activeCatNorm) || 
+      activeCatNorm.includes(songGenreNorm)
+    );
+  };
+
   // Extract unique styles currently present in the active song catalogue
   const songGenres: string[] = Array.from(
     new Set<string>(
@@ -84,18 +106,18 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onSelectCategory, activeCate
   const filteredSongs = useMemo(() => {
     let result = activeCategory && activeCategory !== 'Todas'
       ? songs.filter(s => 
-          s.genre.toLowerCase() === activeCategory.toLowerCase() ||
-          (s.secondGenre && s.secondGenre.toLowerCase() === activeCategory.toLowerCase())
+          matchGenre(s.genre, activeCategory) ||
+          matchGenre(s.secondGenre, activeCategory)
         )
       : songs;
 
     if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim();
+      const q = normalizeText(searchQuery);
       result = result.filter(s => 
-        s.name.toLowerCase().includes(q) ||
-        s.artist.toLowerCase().includes(q) ||
-        s.genre.toLowerCase().includes(q) ||
-        (s.secondGenre && s.secondGenre.toLowerCase().includes(q))
+        normalizeText(s.name).includes(q) ||
+        normalizeText(s.artist).includes(q) ||
+        normalizeText(s.genre).includes(q) ||
+        (s.secondGenre && normalizeText(s.secondGenre).includes(q))
       );
     }
 
@@ -111,6 +133,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onSelectCategory, activeCate
     } else {
       playSong(song, listContext);
     }
+    setIsPlayerExpanded(true);
   };
 
   // Get songs for the popular songs carousel, filtering by active category and search query
@@ -120,18 +143,18 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onSelectCategory, activeCate
 
     if (activeCategory && activeCategory !== 'Todas') {
       result = songs.filter(s => 
-        s.genre.toLowerCase() === activeCategory.toLowerCase() ||
-        (s.secondGenre && s.secondGenre.toLowerCase() === activeCategory.toLowerCase())
+        matchGenre(s.genre, activeCategory) ||
+        matchGenre(s.secondGenre, activeCategory)
       );
     }
 
     if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim();
+      const q = normalizeText(searchQuery);
       result = result.filter(s => 
-        s.name.toLowerCase().includes(q) ||
-        s.artist.toLowerCase().includes(q) ||
-        s.genre.toLowerCase().includes(q) ||
-        (s.secondGenre && s.secondGenre.toLowerCase().includes(q))
+        normalizeText(s.name).includes(q) ||
+        normalizeText(s.artist).includes(q) ||
+        normalizeText(s.genre).includes(q) ||
+        (s.secondGenre && normalizeText(s.secondGenre).includes(q))
       );
     }
 
@@ -257,7 +280,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onSelectCategory, activeCate
             O hit de amanhã está aqui na CS Music... <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00E5FF] to-[#D4AF37]">e pode ser seu!</span>
           </h2>
           <p className="text-zinc-200 text-xs sm:text-sm leading-relaxed max-w-xl font-medium font-sans">
-            Se apaixonou ou se arrepiou com o hit? O som pode ser seu! Você escolhe o valor que deseja pagar a partir de <strong>R$ 30,00</strong> e a licença comercial com os arquivos completos já é seu definitivamente.
+            Se apaixonou ou se arrepiou com o hit? Apoie o projeto social <strong className="text-[#9D50BB]">CS do Bem</strong> com uma contribuição voluntária e, em agradecimento, garanta o direito ao seu contrato de <strong>Licença CS Indeterminada</strong> para regravar a música, recebendo os arquivos originais em alta definição (WAV) junto a toda documentação da música.
           </p>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 pt-1">
             <button 
@@ -507,11 +530,14 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onSelectCategory, activeCate
                           e.stopPropagation();
                           setSelectedLicensingSong(song);
                         }}
-                        className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-[#00E5FF]/10 hover:bg-[#00E5FF]/20 text-[#00E5FF] border border-[#00E5FF]/20 rounded-lg transition cursor-pointer"
-                        title="Adquirir Licença (WAV/MP3)"
+                        className="w-full inline-flex items-center justify-center gap-2 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-lg transition cursor-pointer"
+                        title="Licenciar Trilha & Apoiar o Projeto CS do Bem"
                       >
-                        <ShoppingBag className="w-3.5 h-3.5" />
-                        <span>Comprar</span>
+                        <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500 shrink-0 animate-pulse" />
+                        <div className="flex flex-col items-center text-center leading-tight">
+                          <span className="text-[10px] font-bold">Licenciar / Apoiar</span>
+                          <span className="text-[9px] font-black uppercase tracking-wider text-emerald-300">CS do Bem</span>
+                        </div>
                       </button>
                     </div>
                   </div>
@@ -594,11 +620,14 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onSelectCategory, activeCate
                         e.stopPropagation();
                         setSelectedLicensingSong(song);
                       }}
-                      className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-[#00E5FF]/10 hover:bg-[#00E5FF]/20 text-[#00E5FF] border border-[#00E5FF]/20 rounded-lg transition cursor-pointer"
-                      title="Adquirir Licença (WAV/MP3)"
+                      className="w-full inline-flex items-center justify-center gap-2 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-lg transition cursor-pointer"
+                      title="Licenciar Trilha & Apoiar o Projeto CS do Bem"
                     >
-                      <ShoppingBag className="w-3.5 h-3.5" />
-                      <span>Comprar</span>
+                      <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500 shrink-0 animate-pulse" />
+                      <div className="flex flex-col items-center text-center leading-tight">
+                        <span className="text-[10px] font-bold">Licenciar / Apoiar</span>
+                        <span className="text-[9px] font-black uppercase tracking-wider text-emerald-300">CS do Bem</span>
+                      </div>
                     </button>
                   </div>
                 </div>

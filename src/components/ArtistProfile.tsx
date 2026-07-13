@@ -36,7 +36,7 @@ const Tiktok: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 );
 
 export const ArtistProfile: React.FC = () => {
-  const { songs, playSong, currentSong, isPlaying, togglePlay } = useAudio();
+  const { songs, playSong, currentSong, isPlaying, togglePlay, setIsPlayerExpanded } = useAudio();
   const [copied, setCopied] = useState(false);
 
   const handleTrackPlay = (song: Song) => {
@@ -47,6 +47,7 @@ export const ArtistProfile: React.FC = () => {
       const studioSongs = songs.filter(s => s.artist === 'CS Estúdio');
       playSong(song, studioSongs.length > 0 ? studioSongs : songs);
     }
+    setIsPlayerExpanded(true);
   };
 
   const handleCopyEmail = () => {
@@ -210,7 +211,7 @@ export const ArtistProfile: React.FC = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-3">
               <a 
                 href="https://www.instagram.com/carlossilva.ai/" 
                 target="_blank" 
@@ -345,8 +346,8 @@ export const ArtistProfile: React.FC = () => {
                     <p className="text-[10px] text-[#71717A] mt-0.5 font-semibold">{song.album}</p>
                   </div>
 
-                  <span className="p-1 px-2.5 rounded-xl bg-[#050505] text-[9px] font-mono font-black text-[#D4AF37] border border-[#1F1F22]">
-                    R$ {song.plays > 1000 ? '30,00' : '30,00'}+
+                  <span className="p-1 px-2.5 rounded-xl bg-red-500/10 text-[9px] font-black text-red-400 border border-red-500/20 uppercase tracking-wider">
+                    CS do Bem
                   </span>
                 </div>
               );

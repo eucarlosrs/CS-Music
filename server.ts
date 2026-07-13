@@ -18,8 +18,8 @@ async function startServer() {
       const { fullName, phone, cpf, offerValue, songName, songId } = req.body;
       
       const valueNum = Number(offerValue);
-      if (isNaN(valueNum) || valueNum < 30) {
-        return res.status(400).json({ error: "O valor de aquisição não pode ser inferior a R$ 30,00." });
+      if (isNaN(valueNum) || valueNum < 1) {
+        return res.status(400).json({ error: "O valor de contribuição para o projeto CS do Bem deve ser de pelo menos R$ 1,00 para gerar o Pix." });
       }
 
       const token = process.env.MERCADO_PAGO_ACCESS_TOKEN;
@@ -59,7 +59,7 @@ async function startServer() {
         },
         body: JSON.stringify({
           transaction_amount: valueNum,
-          description: `Licença Comercial: ${songName}`,
+          description: `Contribuição CS do Bem - Trilha: ${songName}`,
           payment_method_id: "pix",
           payer: {
             email: `${cleanCpf}@csestudio.com.br`, // standard fallback email structured with CPF
@@ -136,6 +136,33 @@ async function startServer() {
     } catch (error: any) {
       console.error("Exception occurred during status check:", error);
       return res.status(500).json({ error: "Falha interna ao verificar o status." });
+    }
+  });
+
+  // 3. Image Proxy to bypass CORS issues for canvas rendering
+  app.get("/api/image-proxy", async (req, res) => {
+    try {
+      const imageUrl = req.query.url as string;
+      if (!imageUrl) {
+        return res.status(400).send("Missing image url");
+      }
+
+      const response = await fetch(imageUrl);
+      if (!response.ok) {
+        return res.status(response.status).send("Failed to fetch image");
+      }
+
+      const contentType = response.headers.get("content-type");
+      if (contentType) {
+        res.setHeader("Content-Type", contentType);
+      }
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      
+      const buffer = await response.arrayBuffer();
+      res.send(Buffer.from(buffer));
+    } catch (error: any) {
+      console.error("Error proxying image:", error);
+      res.status(500).send("Error proxying image");
     }
   });
 
