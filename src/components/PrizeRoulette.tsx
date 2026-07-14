@@ -296,7 +296,7 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
     setRotation(targetRotation);
 
     const spinDuration = 6000;
-    const postSpinDelay = 3000; // 3 seconds delay so they have time to analyze how close it stopped to the line!
+    const postSpinDelay = 2000; // 2 seconds delay so they have time to analyze how close it stopped to the line!
 
     // Wait for the transition to complete
     setTimeout(() => {

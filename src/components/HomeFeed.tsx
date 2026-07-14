@@ -280,7 +280,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onSelectCategory, activeCate
             O hit de amanhã está aqui na CS Music... <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00E5FF] to-[#D4AF37]">e pode ser seu!</span>
           </h2>
           <p className="text-zinc-200 text-xs sm:text-sm leading-relaxed max-w-xl font-medium font-sans">
-            Se apaixonou ou se arrepiou com o hit? Apoie o projeto social <strong className="text-[#9D50BB]">CS do Bem</strong> com uma contribuição voluntária e, em agradecimento, garanta o direito ao seu contrato de <strong>Licença CS Indeterminada</strong> para regravar a música, recebendo os arquivos originais em alta definição (WAV) junto a toda documentação da música.
+            Aquele refrão que arrepiou pode ganhar a sua voz. Com uma contribuição voluntária ao <strong className="text-[#00E5FF] font-extrabold">CS do Bem</strong>, você recebe a <strong className="text-[#9D50BB] font-extrabold">Licença CS Indeterminada</strong> para regravar a música e todo o material profissional para transformar essa ideia em realidade.
           </p>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 pt-1">
             <button 
