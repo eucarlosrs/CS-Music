@@ -253,7 +253,7 @@ function CSAppContent() {
         <nav 
           id="mobile-nav-stripe" 
           translate="no" 
-          className="fixed bottom-0 left-0 right-0 md:absolute md:bottom-0 bg-[#000000]/95 backdrop-blur-xl border-t border-[#1F1F22] z-40 px-2 py-2 flex items-center justify-around notranslate"
+          className="fixed bottom-0 left-0 right-0 md:absolute md:bottom-0 bg-black/40 backdrop-blur-xl border-t border-white/5 z-40 px-2 py-2 flex items-center justify-around notranslate h-[56px]"
         >
           
           <button 
@@ -300,7 +300,19 @@ function CSAppContent() {
               activeTab === 'csdobem' ? 'text-[#9D50BB]' : 'text-[#71717A] hover:text-[#F4F4F5]'
             }`}
           >
-            <HeartIcon className="w-5 h-5 shrink-0 text-red-500 fill-red-500" />
+            <motion.div
+              animate={{
+                scale: [1, 1.1, 1],
+              }}
+              transition={{
+                duration: 2.0,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              className="shrink-0 flex items-center justify-center text-red-500"
+            >
+              <HeartIcon className="w-5 h-5 fill-currentColor" />
+            </motion.div>
             <span translate="no" className="whitespace-nowrap notranslate">CS do Bem</span>
           </button>
 

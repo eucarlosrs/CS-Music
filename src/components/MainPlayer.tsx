@@ -345,11 +345,22 @@ export const MainPlayer: React.FC = () => {
             initial={{ y: 80, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 80, opacity: 0 }}
-            className="fixed bottom-[74px] md:bottom-3 left-3 right-3 z-40 bg-[#121214]/95 backdrop-blur-xl border border-[#1F1F22] rounded-2xl h-16 px-4 py-2 flex items-center justify-between gap-4 shadow-[0_8px_30px_rgba(0,0,0,0.8)] max-w-4xl mx-auto cursor-pointer"
+            className="fixed bottom-[55px] md:bottom-3 left-0 right-0 md:left-3 md:right-3 z-40 bg-[#121214]/65 backdrop-blur-xl border-t border-b-0 border-x-0 md:border border-[#1F1F22]/50 rounded-none md:rounded-2xl h-16 px-4 py-2 flex items-center justify-between gap-4 shadow-[0_8px_30px_rgba(0,0,0,0.8)] max-w-4xl mx-auto cursor-pointer overflow-hidden"
             onClick={() => setIsExpanded(true)}
           >
+            {/* Ambient dynamic cover art background glow */}
+            <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none select-none">
+              <img 
+                src={currentSong.coverUrl} 
+                alt="" 
+                className="w-full h-full object-cover scale-150 blur-3xl opacity-60 brightness-90 saturate-150"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute inset-0 bg-black/40" />
+            </div>
+
             {/* Embedded timeline timeline overlay on top */}
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#1F1F22] rounded-t-2xl overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#1F1F22] rounded-t-none md:rounded-t-2xl overflow-hidden">
               <div 
                 className="h-full bg-gradient-to-r from-[#00E5FF] to-[#9D50BB] transition-all duration-300"
                 style={{ width: `${progress}%` }}
@@ -448,10 +459,23 @@ export const MainPlayer: React.FC = () => {
                 onClick={() => setShowLicensing(true)}
                 className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-4 sm:py-1.5 bg-gradient-to-tr from-[#00E5FF] to-[#9D50BB] text-black rounded-xl shadow-lg hover:opacity-90 active:scale-95 transition cursor-pointer shrink-0"
               >
-                <Heart className="w-3.5 h-3.5 text-red-600 fill-red-600 shrink-0 animate-pulse" />
+                <motion.div
+                  animate={{
+                    scale: [1, 1.18, 1],
+                    color: ["#b91c1c", "#ff1744", "#b91c1c"]
+                  }}
+                  transition={{
+                    duration: 1.6,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                  className="shrink-0 flex items-center justify-center"
+                >
+                  <Heart className="w-3.5 h-3.5" fill="currentColor" />
+                </motion.div>
                 <div className="flex flex-col items-center text-center leading-tight">
-                  <span className="text-[8px] sm:text-[10px] font-black">Licenciar / Apoiar</span>
-                  <span className="text-[7px] sm:text-[9px] font-black uppercase tracking-wider opacity-90">CS DO BEM</span>
+                  <span className="text-[8px] sm:text-[10px] font-black whitespace-nowrap">Licenciar / Apoiar</span>
+                  <span className="text-[7px] sm:text-[9px] font-black uppercase tracking-wider opacity-90 whitespace-nowrap">CS DO BEM</span>
                 </div>
               </button>
             </div>
