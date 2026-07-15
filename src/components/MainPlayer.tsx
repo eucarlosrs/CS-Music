@@ -432,26 +432,29 @@ export const MainPlayer: React.FC = () => {
             className="fixed inset-0 z-50 bg-[#050505] flex flex-col justify-between overflow-hidden"
           >
             {/* Blurry colorful atmospheric backing */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
               <div 
-                className="absolute -top-1/4 -left-1/4 w-[150%] h-[150%] bg-cover bg-center blur-3xl scale-125 select-none"
+                className="absolute inset-0 bg-cover bg-center blur-[110px] scale-150 select-none opacity-45"
                 style={{ backgroundImage: `url('${currentSong.coverUrl}')` }}
               />
+              <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/40 via-[#050505]/85 to-[#050505]" />
             </div>
 
             {/* TOP BAR ACTION BAR */}
-            <div className="relative flex items-center justify-between p-4 sm:p-6 z-10 shrink-0">
-              <button 
-                id="collapse-player-btn"
-                onClick={() => setIsExpanded(false)}
-                className="p-2 rounded-xl bg-[#18181B]/80 text-[#A1A1AA] hover:text-white border border-[#27272A] transition"
-              >
-                <X className="w-5 h-5" />
-              </button>
-              
-              <div className="text-center">
-                <p className="text-[10px] uppercase font-bold tracking-widest text-[#71717A]">Tocando Agora</p>
-                <p className="text-xs font-semibold text-neutral-300 truncate max-w-[150px] sm:max-w-[200px]">{currentSong.album}</p>
+            <div className="relative flex items-center justify-between p-4 sm:p-6 z-10 shrink-0 gap-4">
+              <div className="flex items-center gap-3">
+                <button 
+                  id="collapse-player-btn"
+                  onClick={() => setIsExpanded(false)}
+                  className="p-2.5 rounded-xl bg-[#18181B]/80 text-[#A1A1AA] hover:text-white border border-[#27272A] transition shrink-0 cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+                
+                <div className="text-left">
+                  <p className="text-[9px] uppercase font-bold tracking-widest text-[#71717A] leading-none mb-1">Tocando Agora</p>
+                  <p className="text-xs font-black text-white/95 truncate max-w-[120px] xs:max-w-[160px] sm:max-w-[220px] leading-none">{currentSong.album}</p>
+                </div>
               </div>
 
               <button 
@@ -487,12 +490,17 @@ export const MainPlayer: React.FC = () => {
               <div className={`w-full md:w-1/2 flex flex-col items-center justify-center space-y-3 sm:space-y-6 ${isLyricsExpanded ? 'hidden md:flex' : 'flex'} min-h-0`}>
                 <motion.div 
                   layoutId={`fullscreen-artwork-${currentSong.id}`}
-                  className="w-44 h-44 sm:w-72 sm:h-72 md:w-96 md:h-96 rounded-3xl overflow-hidden shadow-[0_12px_60px_rgba(0,0,0,0.8)] border border-[#1F1F22] aspect-square shrink-1 min-h-0 max-h-[32vh] relative group"
+                  className="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 rounded-3xl overflow-hidden shadow-[0_12px_60px_rgba(0,0,0,0.8)] border border-[#1F1F22] aspect-square shrink-1 min-h-0 max-h-[38vh] relative group"
                 >
                   <img 
                     src={currentSong.coverUrl} 
                     alt={currentSong.name} 
-                    className="w-full h-full object-cover transition duration-500" 
+                    className="w-full h-full object-cover transition duration-500 select-none" 
+                    style={{ 
+                      imageRendering: 'auto', 
+                      WebkitBackfaceVisibility: 'hidden',
+                      transform: 'translate3d(0, 0, 0)'
+                    }}
                     referrerPolicy="no-referrer"
                   />
                 </motion.div>
