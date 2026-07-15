@@ -460,7 +460,7 @@ export const MainPlayer: React.FC = () => {
               <button 
                 id="trigger-licensing-btn"
                 onClick={() => setShowLicensing(true)}
-                className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-4 sm:py-1.5 bg-gradient-to-tr from-[#00E5FF] to-[#9D50BB] text-black rounded-xl shadow-lg hover:opacity-90 active:scale-95 transition cursor-pointer shrink-0"
+                className="inline-flex items-center gap-1.5 sm:gap-2 px-5 py-1 sm:px-8 sm:py-1.5 bg-gradient-to-tr from-[#00E5FF] to-[#9D50BB] text-black rounded-xl shadow-lg hover:opacity-90 active:scale-95 transition cursor-pointer shrink-0"
               >
                 <motion.div
                   animate={{

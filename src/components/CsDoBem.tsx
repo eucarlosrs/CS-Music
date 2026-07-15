@@ -111,21 +111,39 @@ export const CsDoBem: React.FC = () => {
   return (
     <div className="space-y-6 pb-12 text-left">
       {/* HEADER HERO */}
-      <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800/60 p-6 flex flex-col md:flex-row items-center gap-6 shadow-xl">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-red-500/10 rounded-full blur-2xl pointer-events-none" />
+      <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#0a0f0d] via-[#0d0a0d] to-neutral-950 border border-emerald-500/15 p-6 flex flex-col sm:flex-row items-center sm:items-start gap-6 shadow-2xl">
+        {/* Layered custom light glows representing love, hope, and transparency */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-rose-500/10 rounded-full blur-[90px] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/3 w-32 h-32 bg-amber-500/5 rounded-full blur-[80px] pointer-events-none" />
         
-        <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0 shadow-lg">
-          <Heart className="w-8 h-8 text-emerald-400 fill-emerald-500/15 animate-pulse" />
+        {/* Glowing Beating Heart Visual Focal Point */}
+        <div className="relative w-20 h-20 flex items-center justify-center shrink-0">
+          <div className="absolute inset-0 rounded-full bg-rose-500/15 animate-ping opacity-60" style={{ animationDuration: '3s' }} />
+          <div className="absolute inset-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 animate-pulse" />
+          <div className="relative w-14 h-14 rounded-full bg-neutral-900/90 border border-emerald-500/35 flex items-center justify-center shadow-[0_4px_20px_rgba(16,185,129,0.2)]">
+            <Heart className="w-7 h-7 text-rose-500 fill-rose-500/35 animate-pulse" />
+          </div>
         </div>
         
-        <div className="space-y-2 flex-1 text-center md:text-left">
-          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-black uppercase tracking-wider">
-            Projeto Social
+        <div className="space-y-3 flex-1 text-center sm:text-left relative z-10">
+          <div className="flex flex-wrap justify-center sm:justify-start gap-2">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] font-black uppercase tracking-widest shadow-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Projeto Social
+            </div>
+            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[9px] font-black uppercase tracking-widest shadow-sm">
+              Música que Transforma
+            </div>
           </div>
-          <h2 className="text-xl md:text-2xl font-black text-white tracking-tight">CS do Bem</h2>
-          <p className="text-neutral-300 text-xs md:text-sm leading-relaxed">
-            A transparência e a confiança são o nosso maior patrimônio. Todo o valor arrecadado com o licenciamento e apoio das nossas trilhas sonoras é 100% revertido em ações sociais reais para ajudar quem mais precisa.
+          
+          <div className="space-y-1">
+            <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight leading-none">CS do Bem</h2>
+            <p className="text-emerald-400/90 text-[11px] font-bold tracking-wider uppercase">Transformando arte em solidariedade e esperança</p>
+          </div>
+
+          <p className="text-neutral-300 text-xs sm:text-sm leading-relaxed max-w-2xl">
+            A <span className="text-white font-semibold">transparência</span> e a <span className="text-white font-semibold">confiança</span> são o nosso maior patrimônio. Todo o valor arrecadado com o licenciamento e apoio das nossas trilhas sonoras é <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300 font-extrabold px-1 py-0.5 rounded bg-emerald-500/5">100% revertido em ações sociais reais</span> para ajudar quem mais precisa.
           </p>
         </div>
       </div>
