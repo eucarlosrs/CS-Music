@@ -418,7 +418,7 @@ export const MainPlayer: React.FC = () => {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-            className="fixed inset-0 z-50 bg-[#050505] flex flex-col justify-between overflow-y-auto"
+            className="fixed inset-0 z-50 bg-[#050505] flex flex-col justify-between overflow-hidden"
           >
             {/* Blurry colorful atmospheric backing */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
@@ -429,7 +429,7 @@ export const MainPlayer: React.FC = () => {
             </div>
 
             {/* TOP BAR ACTION BAR */}
-            <div className="relative flex items-center justify-between p-6 z-10">
+            <div className="relative flex items-center justify-between p-4 sm:p-6 z-10 shrink-0">
               <button 
                 id="collapse-player-btn"
                 onClick={() => setIsExpanded(false)}
@@ -440,30 +440,30 @@ export const MainPlayer: React.FC = () => {
               
               <div className="text-center">
                 <p className="text-[10px] uppercase font-bold tracking-widest text-[#71717A]">Tocando Agora</p>
-                <p className="text-xs font-semibold text-neutral-300 truncate max-w-[200px]">{currentSong.album}</p>
+                <p className="text-xs font-semibold text-neutral-300 truncate max-w-[150px] sm:max-w-[200px]">{currentSong.album}</p>
               </div>
 
               <button 
                 id="trigger-licensing-btn"
                 onClick={() => setShowLicensing(true)}
-                className="inline-flex items-center gap-2 px-4 py-1.5 bg-gradient-to-tr from-[#00E5FF] to-[#9D50BB] text-black rounded-xl shadow-lg hover:opacity-90 active:scale-95 transition cursor-pointer"
+                className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-4 sm:py-1.5 bg-gradient-to-tr from-[#00E5FF] to-[#9D50BB] text-black rounded-xl shadow-lg hover:opacity-90 active:scale-95 transition cursor-pointer shrink-0"
               >
-                <Heart className="w-4 h-4 text-red-600 fill-red-600 shrink-0 animate-pulse" />
+                <Heart className="w-3.5 h-3.5 text-red-600 fill-red-600 shrink-0 animate-pulse" />
                 <div className="flex flex-col items-center text-center leading-tight">
-                  <span className="text-[10px] font-black">Licenciar / Apoiar</span>
-                  <span className="text-[9px] font-black uppercase tracking-wider opacity-90">CS do Bem</span>
+                  <span className="text-[8px] sm:text-[10px] font-black">Licenciar / Apoiar</span>
+                  <span className="text-[7px] sm:text-[9px] font-black uppercase tracking-wider opacity-90">CS DO BEM</span>
                 </div>
               </button>
             </div>
 
             {/* BODY CANVAS VIEW (Split: Song detail / Scroll lyrics) */}
-            <div className="relative flex-1 flex flex-col md:flex-row items-center justify-center p-6 md:p-12 gap-8 z-20 max-w-5xl mx-auto w-full">
+            <div className="relative flex-1 flex flex-col md:flex-row items-center justify-center p-4 sm:p-6 md:p-12 gap-4 sm:gap-8 z-20 max-w-5xl mx-auto w-full min-h-0 overflow-hidden">
               
               {/* Left Column: Visual Artwork panel (Visible unless lyrics take full screen on mobile) */}
-              <div className={`w-full md:w-1/2 flex flex-col items-center justify-center space-y-6 ${isLyricsExpanded ? 'hidden md:flex' : 'flex'}`}>
+              <div className={`w-full md:w-1/2 flex flex-col items-center justify-center space-y-3 sm:space-y-6 ${isLyricsExpanded ? 'hidden md:flex' : 'flex'} min-h-0`}>
                 <motion.div 
                   layoutId={`fullscreen-artwork-${currentSong.id}`}
-                  className="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 rounded-3xl overflow-hidden shadow-[0_12px_60px_rgba(0,0,0,0.8)] border border-[#1F1F22] aspect-square shrink-0 relative group"
+                  className="w-44 h-44 sm:w-72 sm:h-72 md:w-96 md:h-96 rounded-3xl overflow-hidden shadow-[0_12px_60px_rgba(0,0,0,0.8)] border border-[#1F1F22] aspect-square shrink-1 min-h-0 max-h-[32vh] relative group"
                 >
                   <img 
                     src={currentSong.coverUrl} 
@@ -474,33 +474,33 @@ export const MainPlayer: React.FC = () => {
                 </motion.div>
 
                 {/* Song and Author details */}
-                <div className="w-full text-center md:text-left flex items-start justify-between gap-4 max-w-sm">
+                <div className="w-full text-center md:text-left flex items-start justify-between gap-4 max-w-sm shrink-0">
                   <div className="text-left w-full min-w-0">
-                    <MarqueeText text={currentSong.name} className="text-xl md:text-2xl font-black text-white font-sans tracking-tight" />
-                    <p className="text-sm text-[#A1A1AA] font-medium truncate mt-1">{currentSong.artist}</p>
+                    <MarqueeText text={currentSong.name} className="text-lg sm:text-xl md:text-2xl font-black text-white font-sans tracking-tight" />
+                    <p className="text-xs sm:text-sm text-[#A1A1AA] font-medium truncate mt-0.5">{currentSong.artist}</p>
                   </div>
                   <div className="flex gap-2 shrink-0">
                     <button 
                       id="fullscreen-favorite-btn"
                       onClick={() => toggleLikeSong(currentSong.id)}
-                      className={`p-3 rounded-xl hover:bg-[#18181B] border border-[#27272A] transition ${isLiked ? 'text-pink-500 border-pink-500/20 bg-pink-500/5' : 'text-[#71717A] hover:text-white'}`}
+                      className={`p-2 sm:p-3 rounded-xl hover:bg-[#18181B] border border-[#27272A] transition ${isLiked ? 'text-pink-500 border-pink-500/20 bg-pink-500/5' : 'text-[#71717A] hover:text-white'}`}
                     >
-                      <Heart className={`w-5 h-5 ${isLiked ? 'fill-pink-500' : ''}`} />
+                      <Heart className={`w-4 sm:w-5 h-4 sm:h-5 ${isLiked ? 'fill-pink-500' : ''}`} />
                     </button>
                     <button 
                       id="fullscreen-add-playlist-btn"
                       onClick={() => setShowAddPlaylistModal(true)}
-                      className="p-3 rounded-xl hover:bg-[#18181B] border border-[#27272A] text-[#71717A] hover:text-[#9D50BB] hover:border-[#9D50BB]/30 transition cursor-pointer"
+                      className="p-2 sm:p-3 rounded-xl hover:bg-[#18181B] border border-[#27272A] text-[#71717A] hover:text-[#9D50BB] hover:border-[#9D50BB]/30 transition cursor-pointer"
                       title="Salvar na playlist"
                     >
-                      <Plus className="w-5 h-5" />
+                      <Plus className="w-4 sm:w-5 h-4 sm:h-5" />
                     </button>
                   </div>
                 </div>
               </div>
 
               {/* Right Column: Lyrics Scroller, or responsive sidebar spacing */}
-              <div className={`w-full md:w-1/2 flex flex-col ${isLyricsExpanded ? 'flex flex-1 h-full' : 'hidden md:flex h-96'}`}>
+              <div className={`w-full md:w-1/2 flex flex-col ${isLyricsExpanded ? 'flex flex-1 h-full' : 'hidden md:flex h-96'} min-h-0`}>
                 <div className="flex items-center justify-between mb-3 shrink-0">
                   <span className="text-xs font-bold uppercase tracking-wider text-[#71717A] flex items-center gap-1">
                     <FileText className="w-3.5 h-3.5" /> Letra da música
@@ -524,12 +524,12 @@ export const MainPlayer: React.FC = () => {
             </div>
 
             {/* CONTROLS BOX SECTION AT BOTTOM (Seeking, Timelines, Player triggers) */}
-            <div className="relative p-6 md:p-8 space-y-6 bg-black/65 backdrop-blur-md border-t border-[#1F1F22]/40 z-10 w-full shrink-0">
+            <div className="relative p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6 bg-black/65 backdrop-blur-md border-t border-[#1F1F22]/40 z-10 w-full shrink-0">
               {/* Smooth Glowing Bottom Wave Visualizer (Pulsing neon waveform sitting behind text, translucent and shifted slightly down) */}
-              <div className="absolute left-0 right-0 bottom-[calc(100%-16px)] md:bottom-[calc(100%-10px)] pointer-events-none z-0 h-[195px] md:h-[260px] overflow-hidden opacity-35 md:opacity-45 select-none">
+              <div className="absolute left-0 right-0 bottom-[calc(100%-16px)] md:bottom-[calc(100%-10px)] pointer-events-none z-0 h-[120px] sm:h-[195px] md:h-[260px] overflow-hidden opacity-35 md:opacity-45 select-none">
                 <AudioWaveVisualizer isPlaying={isPlaying} />
               </div>
-              <div className="max-w-xl mx-auto space-y-4">
+              <div className="max-w-xl mx-auto space-y-3 sm:space-y-4">
                 
                 {/* Micro timing timeline slider */}
                 <div className="space-y-1">
@@ -543,7 +543,7 @@ export const MainPlayer: React.FC = () => {
                     onChange={handleProgressChange}
                     className="w-full h-1 bg-[#1F1F22] rounded-lg appearance-none cursor-pointer accent-[#00E5FF] focus:outline-none"
                   />
-                  <div className="flex justify-between text-xs font-mono text-[#71717A] font-bold">
+                  <div className="flex justify-between text-[10px] sm:text-xs font-mono text-[#71717A] font-bold">
                     <span>{formatTime(currentTime)}</span>
                     <span>{formatTime(duration)}</span>
                   </div>
@@ -555,27 +555,27 @@ export const MainPlayer: React.FC = () => {
                   <button 
                     id="loop-shuffle-btn"
                     onClick={() => setPlayMode(playMode === 'shuffle' ? 'regular' : 'shuffle')}
-                    className={`p-2 transition ${playMode === 'shuffle' ? 'text-[#00E5FF]' : 'text-[#71717A] hover:text-white'}`}
+                    className={`p-1.5 sm:p-2 transition ${playMode === 'shuffle' ? 'text-[#00E5FF]' : 'text-[#71717A] hover:text-white'}`}
                     title="Aleatório"
                   >
-                    <Shuffle className="w-5 h-5" />
+                    <Shuffle className="w-4 sm:w-5 h-4 sm:h-5" />
                   </button>
 
-                  <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-4 sm:gap-6">
                     {/* Previous Track */}
                     <button 
                       id="track-prev-btn"
                       onClick={prevSong}
-                      className="p-2.5 rounded-full text-neutral-300 hover:text-white hover:bg-neutral-900 transition active:scale-95"
+                      className="p-2 sm:p-2.5 rounded-full text-neutral-300 hover:text-white hover:bg-neutral-900 transition active:scale-95"
                     >
-                      <SkipBack className="w-6 h-6 fill-current" />
+                      <SkipBack className="w-5 h-5 sm:w-6 sm:h-6 fill-current" />
                     </button>
 
                     {/* Play/Pause center toggle featuring custom CS Estúdio logo */}
                     <button 
                       id="track-play-center-btn"
                       onClick={togglePlay}
-                      className="relative w-16 h-16 rounded-full overflow-hidden hover:scale-105 active:scale-95 transition-all duration-300 shadow-[0_0_20px_rgba(0,195,255,0.45)] hover:shadow-[0_0_30px_rgba(157,80,187,0.65)] focus:outline-none border border-cyan-500/30 hover:border-fuchsia-500/50"
+                      className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden hover:scale-105 active:scale-95 transition-all duration-300 shadow-[0_0_20px_rgba(0,195,255,0.45)] hover:shadow-[0_0_30px_rgba(157,80,187,0.65)] focus:outline-none border border-cyan-500/30 hover:border-fuchsia-500/50"
                     >
                       {/* Logo image with dynamic rotation or breath pulse animation on active play */}
                       <img 
@@ -587,9 +587,9 @@ export const MainPlayer: React.FC = () => {
                       {/* Subtly overlay transparent dark glass and responsive Play & Pause symbols */}
                       <div className="absolute inset-0 bg-black/45 hover:bg-black/25 flex items-center justify-center transition-colors">
                         {isPlaying ? (
-                          <Pause className="w-6 h-6 text-white stroke-[2.5px] filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]" />
+                          <Pause className="w-5 h-5 sm:w-6 sm:h-6 text-white stroke-[2.5px] filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]" />
                         ) : (
-                          <Play className="w-6 h-6 text-white fill-white ml-1 filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]" />
+                          <Play className="w-5 h-5 sm:w-6 sm:h-6 text-white fill-white ml-1 filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]" />
                         )}
                       </div>
                     </button>
@@ -598,9 +598,9 @@ export const MainPlayer: React.FC = () => {
                     <button 
                       id="track-next-btn"
                       onClick={nextSong}
-                      className="p-2.5 rounded-full text-neutral-300 hover:text-white hover:bg-neutral-900 transition active:scale-95"
+                      className="p-2 sm:p-2.5 rounded-full text-neutral-300 hover:text-white hover:bg-neutral-900 transition active:scale-95"
                     >
-                      <SkipForward className="w-6 h-6 fill-current" />
+                      <SkipForward className="w-5 h-5 sm:w-6 sm:h-6 fill-current" />
                     </button>
                   </div>
 
@@ -608,15 +608,15 @@ export const MainPlayer: React.FC = () => {
                   <button 
                     id="loop-repeat-btn"
                     onClick={() => setPlayMode(playMode === 'repeat' ? 'regular' : 'repeat')}
-                    className={`p-2 transition ${playMode === 'repeat' ? 'text-[#9D50BB]' : 'text-[#71717A] hover:text-white'}`}
+                    className={`p-1.5 sm:p-2 transition ${playMode === 'repeat' ? 'text-[#9D50BB]' : 'text-[#71717A] hover:text-white'}`}
                     title="Repetir música"
                   >
-                    <Repeat className="w-5 h-5" />
+                    <Repeat className="w-4 sm:w-5 h-4 sm:h-5" />
                   </button>
                 </div>
 
                 {/* Foot Volume & Sharing triggers bar */}
-                <div className="flex items-center justify-between pt-4 border-t border-[#1F1F22] text-[#71717A] text-xs">
+                <div className="flex items-center justify-between pt-2.5 sm:pt-4 border-t border-[#1F1F22] text-[#71717A] text-[11px] sm:text-xs">
                   
                   {/* Adaptive Volume Controller */}
                   <div className="flex items-center gap-1.5 w-1/3 min-w-[110px] h-8" onClick={e => e.stopPropagation()}>
@@ -674,7 +674,6 @@ export const MainPlayer: React.FC = () => {
 
               </div>
             </div>
-
           </motion.div>
         )}
       </AnimatePresence>

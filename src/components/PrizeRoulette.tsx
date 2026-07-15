@@ -336,7 +336,7 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="w-full max-w-md flex flex-col items-center justify-center min-h-[50vh] p-6 bg-[#0B0B0C] border border-[#1F1F22] rounded-3xl space-y-6 shadow-[0_20px_50px_rgba(0,0,0,0.9)] text-center relative"
+            className="w-full max-w-md flex flex-col items-center justify-center bg-[#0B0B0C] border border-[#1F1F22] rounded-3xl p-5 sm:p-6 space-y-4 sm:space-y-6 shadow-[0_20px_50px_rgba(0,0,0,0.9)] text-center relative max-h-[92vh] overflow-y-auto"
           >
             {/* Close Button */}
             <button 
@@ -347,19 +347,19 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
             </button>
 
             {/* Sparkles / Title */}
-            <div className="space-y-2">
+            <div className="space-y-1 sm:space-y-2">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-black uppercase tracking-widest">
                 <Check className="w-3.5 h-3.5 text-emerald-400 stroke-[3px]" /> Voto Confirmado!
               </div>
-              <h2 className="text-xl font-black font-sans tracking-tight text-white mt-1">
+              <h2 className="text-lg sm:text-xl font-black font-sans tracking-tight text-white mt-1">
                 Você votou com sucesso!
               </h2>
             </div>
 
-            {/* Artist Card styled like the screenshot */}
-            <div className="flex flex-col items-center justify-center py-4">
+            {/* Artist Card styled like the screenshot, smaller on mobile to fit perfectly */}
+            <div className="flex flex-col items-center justify-center py-2 sm:py-4">
               <div className="relative">
-                <div className="w-44 h-44 rounded-full overflow-hidden border-4 border-[#00E5FF] shadow-[0_0_30px_rgba(0,229,255,0.4)] flex items-center justify-center bg-neutral-900">
+                <div className="w-32 h-32 sm:w-44 sm:h-44 rounded-full overflow-hidden border-3 sm:border-4 border-[#00E5FF] shadow-[0_0_30px_rgba(0,229,255,0.4)] flex items-center justify-center bg-neutral-900">
                   {votedArtist?.imageUrl ? (
                     <img
                       src={votedArtist.imageUrl}
@@ -368,21 +368,21 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
                       referrerPolicy="no-referrer"
                     />
                   ) : (
-                    <Award className="w-14 h-14 text-neutral-400" />
+                    <Award className="w-10 h-10 sm:w-14 sm:h-14 text-neutral-400" />
                   )}
                 </div>
                 {/* ✓ VOTADO! Badge overlapping the bottom center */}
-                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 px-4 py-1.5 bg-[#00C853] text-white text-[10px] font-black uppercase tracking-wider rounded-full shadow-[0_4px_12px_rgba(0,200,83,0.4)] border-2 border-[#0B0B0C] flex items-center gap-1 shrink-0 whitespace-nowrap">
-                  <Check className="w-3 h-3 stroke-[4px]" />
+                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 px-3 py-1 sm:px-4 sm:py-1.5 bg-[#00C853] text-white text-[9px] sm:text-[10px] font-black uppercase tracking-wider rounded-full shadow-[0_4px_12px_rgba(0,200,83,0.4)] border-2 border-[#0B0B0C] flex items-center gap-1 shrink-0 whitespace-nowrap">
+                  <Check className="w-2.5 h-2.5 sm:w-3 sm:h-3 stroke-[4px]" />
                   <span>Votado!</span>
                 </div>
               </div>
               
-              <h3 className="text-xl font-black text-white font-sans tracking-tight mt-6 text-center">
+              <h3 className="text-lg sm:text-xl font-black text-white font-sans tracking-tight mt-4 sm:mt-6 text-center">
                 {votedArtist?.name || 'Artista'}
               </h3>
               
-              <p className="text-[11px] font-black text-[#00E5FF] tracking-wider uppercase mt-1 text-center">
+              <p className="text-[10px] sm:text-[11px] font-black text-[#00E5FF] tracking-wider uppercase mt-1 text-center">
                 {(() => {
                   const femaleArtists = ['anitta', 'pitty', 'marisa monte', 'ana vitória', 'ana vitoria', 'marilia', 'marília', 'luisa', 'luísa', 'ludmilla', 'ivete', 'claudia leitte', 'simone', 'simaria', 'joelma', 'gloria groove', 'pabllo'];
                   const lowerName = (votedArtist?.name || '').toLowerCase();
@@ -393,7 +393,7 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
             </div>
 
             {/* Explanatory text */}
-            <p className="text-xs text-neutral-400 leading-relaxed font-medium px-4">
+            <p className="text-[11px] sm:text-xs text-neutral-400 leading-relaxed font-medium px-2 sm:px-4">
               Agora que o seu voto foi registrado, você ganhou uma chance exclusiva de girar a nossa **Roleta da Sorte** para tentar ganhar brindes incríveis!
             </p>
 
@@ -401,7 +401,7 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
             <button
               id="btn-prosseguir-roleta"
               onClick={() => setShowIntro(false)}
-              className="w-full py-3.5 px-6 rounded-2xl text-xs font-extrabold uppercase tracking-widest text-black bg-[#00E5FF] hover:bg-[#00E5FF]/90 hover:scale-[1.02] active:scale-95 transition-all duration-300 shadow-xl shadow-[#00E5FF]/10 cursor-pointer flex items-center justify-center gap-2"
+              className="w-full py-3 sm:py-3.5 px-6 rounded-2xl text-[11px] sm:text-xs font-extrabold uppercase tracking-widest text-black bg-[#00E5FF] hover:bg-[#00E5FF]/90 hover:scale-[1.02] active:scale-95 transition-all duration-300 shadow-xl shadow-[#00E5FF]/10 cursor-pointer flex items-center justify-center gap-2"
             >
               <span>Acessar Roleta da Sorte</span>
               <Gift className="w-4 h-4" />
