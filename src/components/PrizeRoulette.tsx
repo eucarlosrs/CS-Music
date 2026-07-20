@@ -287,7 +287,7 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
     // Each sector takes 45 degrees.
     // Landing on sector i means rotating the wheel by:
     // 360 - (i * 45) - 5 (to land 5 degrees inside the sector, right past the divider)
-    const extraSpins = 7; // Spin 7 times for dramatic effect with longer duration
+    const extraSpins = 15; // Spin 15 times for dramatic effect with longer duration
     const finalAngleInSector = 5; // Absolute rule of the roulette (very close to the dividing line!)
     const sectorAngle = winningIdx * 45;
     const destinationAngle = (360 - sectorAngle - finalAngleInSector) % 360;
@@ -295,7 +295,7 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
     const targetRotation = rotation + (extraSpins * 360) + destinationAngle;
     setRotation(targetRotation);
 
-    const spinDuration = 6000;
+    const spinDuration = 15000;
     const postSpinDelay = 2000; // 2 seconds delay so they have time to analyze how close it stopped to the line!
 
     // Wait for the transition to complete
@@ -455,7 +455,7 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
                 className="w-[280px] h-[280px] md:w-[320px] md:h-[320px] z-10 rounded-full overflow-hidden"
                 style={{ originX: 0.5, originY: 0.5 }}
                 animate={{ rotate: rotation }}
-                transition={isSpinning ? { duration: 6, ease: [0.25, 1, 0.5, 1] } : { duration: 0 }}
+                transition={isSpinning ? { duration: 15, ease: [0.25, 1, 0.5, 1] } : { duration: 0 }}
               >
                 <svg
                   viewBox="0 0 400 400"
