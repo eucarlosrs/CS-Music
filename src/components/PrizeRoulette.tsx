@@ -139,6 +139,8 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
 
   // References for managing audios
   const rouletteAudioRef = useRef<HTMLAudioElement | null>(null);
+  const applauseAudioRef = useRef<HTMLAudioElement | null>(null);
+  const disappointmentAudioRef = useRef<HTMLAudioElement | null>(null);
   const initialVolumeRef = useRef<number>(volume);
   const wasPlayingRef = useRef<boolean>(false);
 
@@ -147,6 +149,12 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
     return () => {
       if (rouletteAudioRef.current) {
         rouletteAudioRef.current.pause();
+      }
+      if (applauseAudioRef.current) {
+        applauseAudioRef.current.pause();
+      }
+      if (disappointmentAudioRef.current) {
+        disappointmentAudioRef.current.pause();
       }
     };
   }, []);
@@ -169,6 +177,12 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
   const handleExitWithoutMusic = () => {
     if (rouletteAudioRef.current) {
       rouletteAudioRef.current.pause();
+    }
+    if (applauseAudioRef.current) {
+      applauseAudioRef.current.pause();
+    }
+    if (disappointmentAudioRef.current) {
+      disappointmentAudioRef.current.pause();
     }
     if (isPlaying) {
       togglePlay();
@@ -289,6 +303,12 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
     if (rouletteAudioRef.current) {
       rouletteAudioRef.current.pause();
     }
+    if (applauseAudioRef.current) {
+      applauseAudioRef.current.pause();
+    }
+    if (disappointmentAudioRef.current) {
+      disappointmentAudioRef.current.pause();
+    }
     const audio = new Audio(rouletteAudioUrl);
     audio.volume = 0.0; // Start at 0 volume to prevent click or starting artifact
     rouletteAudioRef.current = audio;
@@ -337,7 +357,7 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
     setRotation(targetRotation);
 
     const spinDuration = 22000; // 22 seconds of active spin!
-    const postSpinDelay = 1000; // 1 second delay so they have time to analyze how close it stopped to the line!
+    const postSpinDelay = 200; // 200ms delay so they have time to analyze how close it stopped to the line!
 
     // Fade out "Pião do Baú" audio gracefully over the last 4 seconds of the 22s spin (starting at 18 seconds)
     const fadeStartTimeout = setTimeout(() => {
@@ -366,6 +386,31 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
 
       setIsSpinning(false);
       setIsWaitingDelay(true);
+
+      // Play the custom applause sound exactly in the middle of this 1 second (500ms)
+      // only if it landed on any of the specified prize sectors: artist, cs_estudio, sponsor1, sponsor2
+      const isPrize = targetSector.type === 'artist' || 
+                      targetSector.type === 'cs_estudio' || 
+                      targetSector.type === 'sponsor1' || 
+                      targetSector.type === 'sponsor2';
+      
+      if (isPrize) {
+        if (applauseAudioRef.current) {
+          applauseAudioRef.current.pause();
+        }
+        const applauseAudio = new Audio('https://firebasestorage.googleapis.com/v0/b/gen-lang-client-0472481079.firebasestorage.app/o/M%C3%BAsica%20da%20Roleta%2FSom%20de%20aplausos.mp3?alt=media&token=e14d5e67-f264-4494-9d5a-74630bf17a6e');
+        applauseAudio.volume = 1.0;
+        applauseAudioRef.current = applauseAudio;
+        applauseAudio.play().catch(err => console.warn("Failed to play applause sound:", err));
+      } else if (targetSector.type === 'not_this_time') {
+        if (disappointmentAudioRef.current) {
+          disappointmentAudioRef.current.pause();
+        }
+        const disappointmentAudio = new Audio('https://firebasestorage.googleapis.com/v0/b/gen-lang-client-0472481079.firebasestorage.app/o/M%C3%BAsica%20da%20Roleta%2FEfeito%20sonoro%20decep%C3%A7%C3%A3o.mp3?alt=media&token=a170e5e3-55f1-4b96-a25d-6fffdad6e71a');
+        disappointmentAudio.volume = 1.0;
+        disappointmentAudioRef.current = disappointmentAudio;
+        disappointmentAudio.play().catch(err => console.warn("Failed to play disappointment sound:", err));
+      }
 
       // Now we wait an additional delay for the participant to analyze where it stopped
       setTimeout(() => {
