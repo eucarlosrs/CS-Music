@@ -354,7 +354,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onTriggerLogin }) => {
   const [sponsor2Prize, setSponsor2Prize] = useState('um lindo boné exclusivo');
   const [csEstudioPrize, setCsEstudioPrize] = useState('Fone bluetooth do CS Estúdio');
   const [artistPrize, setArtistPrize] = useState('Fone bluetooth do CS Estúdio');
-  const [rouletteAudioUrl, setRouletteAudioUrl] = useState('https://firebasestorage.googleapis.com/v0/b/gen-lang-client-0472481079.firebasestorage.app/o/piao_do_bau.mp3?alt=media');
   const [isSavingRoulette, setIsSavingRoulette] = useState(false);
 
   // Song uploading states
@@ -523,7 +522,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onTriggerLogin }) => {
         if (data.sponsor2Prize) setSponsor2Prize(data.sponsor2Prize);
         if (data.csEstudioPrize) setCsEstudioPrize(data.csEstudioPrize);
         if (data.artistPrize) setArtistPrize(data.artistPrize);
-        if (data.audioUrl) setRouletteAudioUrl(data.audioUrl);
       }
     }, (error) => {
       console.warn("Error fetching roulette config:", error);
@@ -545,7 +543,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onTriggerLogin }) => {
         sponsor2Prize,
         csEstudioPrize,
         artistPrize,
-        audioUrl: rouletteAudioUrl,
         updatedAt: new Date().toISOString()
       });
       setAdminStatusMsg('Configuração da roleta salva com sucesso!');
@@ -1721,25 +1718,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onTriggerLogin }) => {
                         className="w-full px-3 py-1.5 bg-[#131315] border border-[#27272A] focus:border-[#00E5FF] focus:outline-none rounded-lg text-xs text-white placeholder-[#71717A] transition"
                       />
                     </div>
-                  </div>
-                </div>
-
-                {/* Áudio e Mídia da Roleta */}
-                <div className="space-y-4 p-4 bg-[#18181B] border border-[#1F1F22] rounded-xl md:col-span-2">
-                  <h3 className="text-xs uppercase tracking-widest text-[#00E5FF] font-black">Áudio e Mídia da Roleta</h3>
-                  <div className="space-y-1">
-                    <label className="text-[10px] text-[#A1A1AA] font-bold">URL da Música da Roleta (Ex: Pião do Baú .mp3 no Firebase)</label>
-                    <input
-                      type="text"
-                      required
-                      value={rouletteAudioUrl}
-                      onChange={(e) => setRouletteAudioUrl(e.target.value)}
-                      placeholder="Insira a URL do áudio hospedado no Firebase Storage ou outra fonte"
-                      className="w-full px-3 py-1.5 bg-[#131315] border border-[#27272A] focus:border-[#00E5FF] focus:outline-none rounded-lg text-xs text-white placeholder-[#71717A] transition font-mono"
-                    />
-                    <p className="text-[10px] text-neutral-400">
-                      O arquivo .mp3 configurado acima será executado quando a roleta começar a girar.
-                    </p>
                   </div>
                 </div>
 

@@ -124,7 +124,7 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
   const [sponsor2Prize, setSponsor2Prize] = useState('um lindo boné exclusivo');
   const [csEstudioPrize, setCsEstudioPrize] = useState('Fone bluetooth do CS Music');
   const [artistPrize, setArtistPrize] = useState('Fone bluetooth do CS Music');
-  const [rouletteAudioUrl, setRouletteAudioUrl] = useState('https://firebasestorage.googleapis.com/v0/b/gen-lang-client-0472481079.firebasestorage.app/o/piao_do_bau.mp3?alt=media');
+  const rouletteAudioUrl = 'https://firebasestorage.googleapis.com/v0/b/gen-lang-client-0472481079.firebasestorage.app/o/M%C3%BAsica%20da%20Roleta%2FPi%C3%A3o%20do%20Ba%C3%BA.MP3?alt=media&token=06cac443-bf73-444e-b95b-251b3a7446de';
 
   // Spinning and Game States
   const [showIntro, setShowIntro] = useState(true);
@@ -194,7 +194,6 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
           if (data.sponsor2Prize) setSponsor2Prize(data.sponsor2Prize);
           if (data.csEstudioPrize) setCsEstudioPrize(data.csEstudioPrize);
           if (data.artistPrize) setArtistPrize(data.artistPrize);
-          if (data.audioUrl) setRouletteAudioUrl(data.audioUrl);
         }
       } catch (err) {
         console.warn('Could not load roulette configs from Firestore:', err);
@@ -286,14 +285,35 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
       togglePlay();
     }
 
-    // Play "Pião do Baú" sound at normal/full volume
+    // Play "Pião do Baú" sound with a smooth fade-in
     if (rouletteAudioRef.current) {
       rouletteAudioRef.current.pause();
     }
     const audio = new Audio(rouletteAudioUrl);
-    audio.volume = 1.0;
+    audio.volume = 0.0; // Start at 0 volume to prevent click or starting artifact
     rouletteAudioRef.current = audio;
-    audio.play().catch(err => console.warn("Failed to play roulette theme sound:", err));
+    
+    audio.play()
+      .then(() => {
+        // Ramp up volume from 0 to 1.0 over 1.5 seconds (1500ms)
+        const fadeInDuration = 1500;
+        const fadeInSteps = 15;
+        const volumeIncrement = 1.0 / fadeInSteps;
+        let currentStep = 0;
+        
+        const fadeInInterval = setInterval(() => {
+          if (rouletteAudioRef.current === audio) {
+            currentStep++;
+            audio.volume = Math.min(1.0, currentStep * volumeIncrement);
+            if (currentStep >= fadeInSteps) {
+              clearInterval(fadeInInterval);
+            }
+          } else {
+            clearInterval(fadeInInterval);
+          }
+        }, fadeInDuration / fadeInSteps);
+      })
+      .catch(err => console.warn("Failed to play roulette theme sound:", err));
 
     // Save current rotation to previousRotation so Framer Motion keyframes start from the right place
     setPreviousRotation(rotation);
@@ -317,7 +337,7 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
     setRotation(targetRotation);
 
     const spinDuration = 22000; // 22 seconds of active spin!
-    const postSpinDelay = 2000; // 2 seconds delay so they have time to analyze how close it stopped to the line!
+    const postSpinDelay = 1000; // 1 second delay so they have time to analyze how close it stopped to the line!
 
     // Fade out "Pião do Baú" audio gracefully over the last 4 seconds of the 22s spin (starting at 18 seconds)
     const fadeStartTimeout = setTimeout(() => {

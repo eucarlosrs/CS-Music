@@ -172,6 +172,33 @@ export const MainPlayer: React.FC = () => {
     }
   }, [isExpanded]);
 
+  // State to track scroll bottom proximity for desktop & tablet versions to slide the mini-player dynamically
+  const [isAtBottom, setIsAtBottom] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Check if scroll has reached near the bottom of the page
+      const threshold = 15;
+      const totalHeight = document.documentElement.scrollHeight;
+      const viewportHeight = window.innerHeight;
+      const currentScroll = window.scrollY;
+      
+      const scrolledToBottom = viewportHeight + currentScroll >= totalHeight - threshold;
+      setIsAtBottom(scrolledToBottom);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    // Run initially and after a slight layout stabilization delay
+    handleScroll();
+    const timeoutId = setTimeout(handleScroll, 400);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(timeoutId);
+    };
+  }, []);
+
   const [showSharePanel, setShowSharePanel] = useState(false);
   const [showLicensing, setShowLicensing] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
@@ -345,7 +372,7 @@ export const MainPlayer: React.FC = () => {
             initial={{ y: 80, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 80, opacity: 0 }}
-            className="fixed bottom-[55px] md:bottom-3 left-0 right-0 md:left-3 md:right-3 z-40 bg-[#121214]/65 backdrop-blur-xl border-t border-b-0 border-x-0 md:border border-[#1F1F22]/50 rounded-none md:rounded-2xl h-16 px-4 py-2 flex items-center justify-between gap-4 shadow-[0_8px_30px_rgba(0,0,0,0.8)] max-w-4xl mx-auto cursor-pointer overflow-hidden"
+            className={`fixed ${isAtBottom ? 'bottom-[55px] md:bottom-[68px]' : 'bottom-[55px] md:bottom-3'} left-0 right-0 md:left-3 md:right-3 z-40 bg-[#121214]/65 backdrop-blur-xl border-t border-b-0 border-x-0 md:border border-[#1F1F22]/50 rounded-none md:rounded-2xl h-16 px-4 py-2 flex items-center justify-between gap-4 shadow-[0_8px_30px_rgba(0,0,0,0.8)] max-w-md md:max-w-[552px] mx-auto cursor-pointer overflow-hidden transition-all duration-300 ease-in-out`}
             onClick={() => setIsExpanded(true)}
           >
             {/* Ambient dynamic cover art background glow */}
