@@ -528,14 +528,14 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onSelectCategory, activeCate
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          setSelectedLicensingSong(song);
+                           setSelectedLicensingSong(song);
                         }}
-                        className="w-full inline-flex items-center justify-center gap-2 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-lg transition cursor-pointer"
+                        className="w-full inline-flex items-center justify-center gap-1 px-1 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-lg transition cursor-pointer"
                         title="Licenciar Trilha & Apoiar o Projeto CS do Bem"
                       >
-                        <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500 shrink-0 animate-pulse" />
-                        <div className="flex flex-col items-center text-center leading-tight">
-                          <span className="text-[10px] font-bold">Licenciar / Apoiar</span>
+                        <Heart className="w-3 h-3 text-red-500 fill-red-500 shrink-0 animate-pulse" />
+                        <div className="flex flex-col items-center text-center leading-tight min-w-0">
+                          <span className="text-[10px] font-bold tracking-tight">Licenciar / Apoiar</span>
                           <span className="text-[9px] font-black uppercase tracking-wider text-emerald-300">CS do Bem</span>
                         </div>
                       </button>
@@ -620,12 +620,12 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onSelectCategory, activeCate
                         e.stopPropagation();
                         setSelectedLicensingSong(song);
                       }}
-                      className="w-full inline-flex items-center justify-center gap-2 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-lg transition cursor-pointer"
+                      className="w-full inline-flex items-center justify-center gap-1 px-1 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-lg transition cursor-pointer"
                       title="Licenciar Trilha & Apoiar o Projeto CS do Bem"
                     >
-                      <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500 shrink-0 animate-pulse" />
-                      <div className="flex flex-col items-center text-center leading-tight">
-                        <span className="text-[10px] font-bold">Licenciar / Apoiar</span>
+                      <Heart className="w-3 h-3 text-red-500 fill-red-500 shrink-0 animate-pulse" />
+                      <div className="flex flex-col items-center text-center leading-tight min-w-0">
+                        <span className="text-[10px] font-bold tracking-tight">Licenciar / Apoiar</span>
                         <span className="text-[9px] font-black uppercase tracking-wider text-emerald-300">CS do Bem</span>
                       </div>
                     </button>
