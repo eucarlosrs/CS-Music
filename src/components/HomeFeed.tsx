@@ -528,15 +528,17 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onSelectCategory, activeCate
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                           setSelectedLicensingSong(song);
+                          setSelectedLicensingSong(song);
                         }}
-                        className="w-full inline-flex items-center justify-center gap-1 px-1 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-lg transition cursor-pointer"
+                        className="w-full inline-flex items-center justify-center px-1 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-lg transition cursor-pointer"
                         title="Licenciar Trilha & Apoiar o Projeto CS do Bem"
                       >
-                        <Heart className="w-3 h-3 text-red-500 fill-red-500 shrink-0 animate-pulse" />
                         <div className="flex flex-col items-center text-center leading-tight min-w-0">
-                          <span className="text-[10px] font-bold tracking-tight">Licenciar / Apoiar</span>
-                          <span className="text-[9px] font-black uppercase tracking-wider text-emerald-300">CS do Bem</span>
+                          <span className="text-[9px] sm:text-[10px] font-bold tracking-tighter whitespace-nowrap">Licenciar / Apoiar</span>
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <Heart className="w-2.5 h-2.5 text-red-500 fill-red-500 shrink-0 animate-pulse" />
+                            <span className="text-[8.5px] sm:text-[9px] font-black uppercase tracking-wider text-emerald-300 whitespace-nowrap">CS do Bem</span>
+                          </div>
                         </div>
                       </button>
                     </div>
@@ -567,7 +569,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onSelectCategory, activeCate
                 <div 
                   key={song.id}
                   onClick={() => handleTrackClick(song)}
-                  className="w-[43%] sm:w-[30%] md:w-[22%] lg:w-[17.6%] shrink-0 snap-start snap-always p-3.5 rounded-xl bg-[#18181B] border border-transparent hover:border-[#27272A] hover:bg-[#27272A]/50 transition duration-300 group cursor-pointer flex flex-col justify-between h-full"
+                  className="w-[43%] sm:w-[30%] md:w-[23.5%] lg:w-[23.5%] shrink-0 snap-start snap-always p-3.5 rounded-xl bg-[#18181B] border border-transparent hover:border-[#27272A] hover:bg-[#27272A]/50 transition duration-300 group cursor-pointer flex flex-col justify-between h-full"
                 >
                   <div>
                     <div id={`song-artwork-container-${song.id}`} className="relative aspect-square rounded-lg overflow-hidden mb-3 shadow">
@@ -620,13 +622,15 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onSelectCategory, activeCate
                         e.stopPropagation();
                         setSelectedLicensingSong(song);
                       }}
-                      className="w-full inline-flex items-center justify-center gap-1 px-1 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-lg transition cursor-pointer"
+                      className="w-full inline-flex items-center justify-center px-1 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-lg transition cursor-pointer"
                       title="Licenciar Trilha & Apoiar o Projeto CS do Bem"
                     >
-                      <Heart className="w-3 h-3 text-red-500 fill-red-500 shrink-0 animate-pulse" />
                       <div className="flex flex-col items-center text-center leading-tight min-w-0">
-                        <span className="text-[10px] font-bold tracking-tight">Licenciar / Apoiar</span>
-                        <span className="text-[9px] font-black uppercase tracking-wider text-emerald-300">CS do Bem</span>
+                        <span className="text-[9px] sm:text-[10px] font-bold tracking-tighter whitespace-nowrap">Licenciar / Apoiar</span>
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <Heart className="w-2.5 h-2.5 text-red-500 fill-red-500 shrink-0 animate-pulse" />
+                          <span className="text-[8.5px] sm:text-[9px] font-black uppercase tracking-wider text-emerald-300 whitespace-nowrap">CS do Bem</span>
+                        </div>
                       </div>
                     </button>
                   </div>
