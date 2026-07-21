@@ -2,9 +2,33 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="icon" type="image/png" href="https://firebasestorage.googleapis.com/v0/b/gen-lang-client-0472481079.firebasestorage.app/o/cs%20sem%20fundo.png?alt=media&token=e20f03aa-3acb-4cba-9279-362b7e8490e2" />
     <title>CS Music - Estúdio</title>
+    <script>
+      // Desabilita o gesto de pinça (pinch-to-zoom)
+      document.addEventListener('touchstart', function (event) {
+        if (event.touches.length > 1) {
+          event.preventDefault();
+        }
+      }, { passive: false });
+
+      document.addEventListener('touchmove', function (event) {
+        if (event.touches.length > 1) {
+          event.preventDefault();
+        }
+      }, { passive: false });
+
+      // Desabilita o duplo toque para dar zoom (double-tap to zoom)
+      let lastTouchEnd = 0;
+      document.addEventListener('touchend', function (event) {
+        const now = (new Date()).getTime();
+        if (now - lastTouchEnd <= 300) {
+          event.preventDefault();
+        }
+        lastTouchEnd = now;
+      }, false);
+    </script>
   </head>
   <body>
     <div id="root"></div>
