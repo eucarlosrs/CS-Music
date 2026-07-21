@@ -112,7 +112,7 @@ const drawWedge = (cx: number, cy: number, radius: number, startAngle: number, e
 };
 
 export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClose }) => {
-  const { isPlaying, togglePlay } = useAudio();
+  const { isPlaying, togglePlay, volume, setVolume } = useAudio();
   const [countdown, setCountdown] = useState(5);
 
   // Config states from Firestore
@@ -124,6 +124,7 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
   const [sponsor2Prize, setSponsor2Prize] = useState('um lindo boné exclusivo');
   const [csEstudioPrize, setCsEstudioPrize] = useState('Fone bluetooth do CS Music');
   const [artistPrize, setArtistPrize] = useState('Fone bluetooth do CS Music');
+  const [rouletteAudioUrl, setRouletteAudioUrl] = useState('https://firebasestorage.googleapis.com/v0/b/gen-lang-client-0472481079.firebasestorage.app/o/piao_do_bau.mp3?alt=media');
 
   // Spinning and Game States
   const [showIntro, setShowIntro] = useState(true);
@@ -136,42 +137,46 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
   const [canSpinAgain, setCanSpinAgain] = useState(false);
   const [isWaitingDelay, setIsWaitingDelay] = useState(false);
 
-  // 5 seconds countdown automatic exit returning to main area without music playing
-  const isPlayingRef = useRef(isPlaying);
-  const togglePlayRef = useRef(togglePlay);
-  const onCloseRef = useRef(onClose);
+  // References for managing audios
+  const rouletteAudioRef = useRef<HTMLAudioElement | null>(null);
+  const initialVolumeRef = useRef<number>(volume);
+  const wasPlayingRef = useRef<boolean>(false);
 
+  // Cleanup on unmount
   useEffect(() => {
-    isPlayingRef.current = isPlaying;
-    togglePlayRef.current = togglePlay;
-    onCloseRef.current = onClose;
-  }, [isPlaying, togglePlay, onClose]);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (showOutcomeAnimation && winningSector && winningSector.type !== 'try_again') {
-      const isWinner = winningSector.type !== 'not_this_time';
-      const initialCountdown = isWinner ? 10 : 5;
-      setCountdown(initialCountdown);
-      interval = setInterval(() => {
-        setCountdown(prev => {
-          if (prev <= 1) {
-            clearInterval(interval);
-            // Pause music if it's currently playing to return "sem musicas tocando"
-            if (isPlayingRef.current) {
-              togglePlayRef.current();
-            }
-            onCloseRef.current();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
     return () => {
-      if (interval) clearInterval(interval);
+      if (rouletteAudioRef.current) {
+        rouletteAudioRef.current.pause();
+      }
     };
+  }, []);
+
+  // When result appears, play the background voting song at 0.15 volume
+  useEffect(() => {
+    if (showOutcomeAnimation && winningSector) {
+      // Store current volume so we can restore it when exiting
+      initialVolumeRef.current = volume;
+      // Set to reduced volume
+      setVolume(0.15);
+      // Play global music if it's currently paused
+      if (!isPlaying) {
+        togglePlay();
+      }
+    }
   }, [showOutcomeAnimation, winningSector]);
+
+  // Handle manual exit returning to main area without music playing
+  const handleExitWithoutMusic = () => {
+    if (rouletteAudioRef.current) {
+      rouletteAudioRef.current.pause();
+    }
+    if (isPlaying) {
+      togglePlay();
+    }
+    // Restore the volume level
+    setVolume(initialVolumeRef.current || 0.8);
+    onClose();
+  };
 
   // Load configs
   useEffect(() => {
@@ -189,6 +194,7 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
           if (data.sponsor2Prize) setSponsor2Prize(data.sponsor2Prize);
           if (data.csEstudioPrize) setCsEstudioPrize(data.csEstudioPrize);
           if (data.artistPrize) setArtistPrize(data.artistPrize);
+          if (data.audioUrl) setRouletteAudioUrl(data.audioUrl);
         }
       } catch (err) {
         console.warn('Could not load roulette configs from Firestore:', err);
@@ -274,6 +280,21 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
     setCanSpinAgain(false);
     setIsWaitingDelay(false);
 
+    // Pause the background voting track before spinning starts
+    wasPlayingRef.current = isPlaying;
+    if (isPlaying) {
+      togglePlay();
+    }
+
+    // Play "Pião do Baú" sound at normal/full volume
+    if (rouletteAudioRef.current) {
+      rouletteAudioRef.current.pause();
+    }
+    const audio = new Audio(rouletteAudioUrl);
+    audio.volume = 1.0;
+    rouletteAudioRef.current = audio;
+    audio.play().catch(err => console.warn("Failed to play roulette theme sound:", err));
+
     // Save current rotation to previousRotation so Framer Motion keyframes start from the right place
     setPreviousRotation(rotation);
 
@@ -287,19 +308,42 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
     // Each sector takes 45 degrees.
     // Landing on sector i means rotating the wheel by:
     // 360 - (i * 45) - 5 (to land 5 degrees inside the sector, right past the divider)
-    const extraSpins = 15; // Spin 15 times for dramatic effect with longer duration
-    const finalAngleInSector = 5; // Absolute rule of the roulette (very close to the dividing line!)
+    const extraSpins = 22; // Spin more times to accommodate the 22 seconds duration
+    const finalAngleInSector = 5; // Absolute rule of the roulette
     const sectorAngle = winningIdx * 45;
     const destinationAngle = (360 - sectorAngle - finalAngleInSector) % 360;
     
     const targetRotation = rotation + (extraSpins * 360) + destinationAngle;
     setRotation(targetRotation);
 
-    const spinDuration = 15000;
+    const spinDuration = 22000; // 22 seconds of active spin!
     const postSpinDelay = 2000; // 2 seconds delay so they have time to analyze how close it stopped to the line!
+
+    // Fade out "Pião do Baú" audio gracefully over the last 4 seconds of the 22s spin (starting at 18 seconds)
+    const fadeStartTimeout = setTimeout(() => {
+      const fadeInterval = setInterval(() => {
+        if (rouletteAudioRef.current) {
+          if (rouletteAudioRef.current.volume > 0.05) {
+            rouletteAudioRef.current.volume = Math.max(0, rouletteAudioRef.current.volume - 0.1);
+          } else {
+            rouletteAudioRef.current.volume = 0;
+            clearInterval(fadeInterval);
+          }
+        }
+      }, 300);
+      
+      setTimeout(() => clearInterval(fadeInterval), 4000);
+    }, 18000);
 
     // Wait for the transition to complete
     setTimeout(() => {
+      clearTimeout(fadeStartTimeout);
+      
+      // Stop theme sound completely
+      if (rouletteAudioRef.current) {
+        rouletteAudioRef.current.pause();
+      }
+
       setIsSpinning(false);
       setIsWaitingDelay(true);
 
@@ -455,7 +499,7 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
                 className="w-[280px] h-[280px] md:w-[320px] md:h-[320px] z-10 rounded-full overflow-hidden"
                 style={{ originX: 0.5, originY: 0.5 }}
                 animate={{ rotate: rotation }}
-                transition={isSpinning ? { duration: 15, ease: [0.25, 1, 0.5, 1] } : { duration: 0 }}
+                transition={isSpinning ? { duration: 22, ease: [0.25, 1, 0.5, 1] } : { duration: 0 }}
               >
                 <svg
                   viewBox="0 0 400 400"
@@ -766,22 +810,40 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
               </div>
 
               {/* Action/Dismiss */}
-              <div className="relative z-10 pt-4">
+              <div className="relative z-10 pt-4 space-y-2.5">
                 {winningSector.type === 'try_again' ? (
+                  <div className="space-y-2.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        // Pause background track before starting a new spin
+                        if (isPlaying) {
+                          togglePlay();
+                        }
+                        setShowOutcomeAnimation(false);
+                      }}
+                      className="w-full py-2.5 px-4 bg-[#00E5FF] hover:bg-[#00E5FF]/90 text-black text-xs font-extrabold rounded-xl transition duration-150 active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      Girar Novamente
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={handleExitWithoutMusic}
+                      className="w-full py-2.5 px-4 bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-300 text-xs font-bold rounded-xl transition duration-150 active:scale-95 cursor-pointer"
+                    >
+                      Voltar ao Início
+                    </button>
+                  </div>
+                ) : (
                   <button
                     type="button"
-                    onClick={() => {
-                      setShowOutcomeAnimation(false);
-                    }}
-                    className="w-full py-2.5 px-4 bg-[#00E5FF] hover:bg-[#00E5FF]/90 text-black text-xs font-extrabold rounded-xl transition duration-150 active:scale-95 cursor-pointer"
+                    onClick={handleExitWithoutMusic}
+                    className="w-full py-3 px-4 bg-[#00E5FF] hover:bg-[#00E5FF]/90 text-black text-xs font-extrabold rounded-xl transition duration-150 active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 shadow-lg shadow-[#00E5FF]/10"
                   >
-                    Girar Novamente
+                    Voltar ao Início
                   </button>
-                ) : (
-                  <div className="text-[10px] text-neutral-300 font-bold bg-[#18181B] border border-[#1F1F22] py-2.5 px-3 rounded-lg flex items-center justify-center gap-1.5 animate-pulse">
-                    <span className="w-2 h-2 rounded-full bg-[#00E5FF] animate-ping" />
-                    <span>Retornando em {countdown} segundos...</span>
-                  </div>
                 )}
               </div>
             </motion.div>
