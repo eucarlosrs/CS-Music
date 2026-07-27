@@ -76,7 +76,7 @@ export const ArtistProfile: React.FC = () => {
     <div id="creator-profile-container" className="pb-32 space-y-8 text-white">
       
       {/* 1. HERO HEADER: CARLOS SILVA */}
-      <div className="relative h-[280px] md:h-[350px] rounded-3xl overflow-hidden shadow-2xl flex items-end">
+      <div className="relative h-[280px] md:h-[220px] rounded-3xl overflow-hidden shadow-2xl flex items-end">
         {/* Banner studio background image */}
         <div 
           className="absolute inset-0 bg-cover bg-center transition-all duration-700 hover:scale-105"
@@ -104,9 +104,10 @@ export const ArtistProfile: React.FC = () => {
               <span className="text-[#00E5FF] font-mono text-base font-extrabold">{csTracks.length} faixas</span>
             </div>
             <div className="w-px h-6 bg-[#1F1F22]" />
-            <div className="text-center px-1">
-              <p className="text-[#71717A] text-[9px] uppercase font-heavy tracking-widest">Contribuição Voluntária</p>
-              <span className="text-[#9D50BB] font-mono text-base font-extrabold">Valor Mínimo R$ 1,00</span>
+            <div className="text-center px-2 flex flex-col items-center justify-center">
+              <span className="px-2.5 py-1 rounded-full bg-[#9D50BB]/15 border border-[#9D50BB]/30 text-[#BF5AF2] text-[10px] font-bold tracking-tight">
+                Apoio a partir de R$ 1,00
+              </span>
             </div>
           </div>
         </div>
