@@ -703,7 +703,7 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="w-full max-w-sm text-center py-12 px-6 bg-[#121214] border border-[#1F1F22] rounded-3xl space-y-8 flex flex-col items-center shadow-2xl z-25"
+            className="w-full max-w-sm md:max-w-md lg:max-w-lg text-center py-12 px-6 md:p-10 bg-[#121214] border border-[#1F1F22] rounded-3xl space-y-8 flex flex-col items-center shadow-2xl z-25"
           >
             <div className="w-16 h-16 rounded-2xl bg-[#00E5FF]/15 border border-[#00E5FF]/30 text-[#00E5FF] flex items-center justify-center shadow-xl shadow-[#00E5FF]/5">
               <Check className="w-8 h-8 stroke-[3px] animate-bounce" />

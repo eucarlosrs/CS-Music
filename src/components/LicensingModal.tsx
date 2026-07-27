@@ -290,7 +290,7 @@ export const LicensingModal: React.FC<LicensingModalProps> = ({ song, onClose })
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-xl max-h-[calc(100vh-2rem)] overflow-y-auto bg-neutral-900 border border-neutral-800 rounded-2xl md:rounded-3xl p-5 md:p-8 shadow-[0_0_60px_rgba(0,229,255,0.2)] scrollbar-thin scrollbar-thumb-neutral-800 scrollbar-track-transparent"
+        className="relative w-full max-w-xl md:max-w-2xl lg:max-w-3xl max-h-[calc(100vh-2rem)] overflow-y-auto bg-neutral-900 border border-neutral-800 rounded-2xl md:rounded-3xl p-5 md:p-8 shadow-[0_0_60px_rgba(0,229,255,0.2)] scrollbar-thin scrollbar-thumb-neutral-800 scrollbar-track-transparent"
       >
         {/* Close Button */}
         <button 
