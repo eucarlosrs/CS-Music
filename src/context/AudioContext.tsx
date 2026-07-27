@@ -75,7 +75,7 @@ const DEFAULT_PRELOADS: Song[] = [
     year: 2026,
     coverUrl: "https://images.unsplash.com/photo-1614149162883-504ce4d13909?w=600&auto=format&fit=crop&q=80",
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    lyrics: "Luzes piscam na cidade vazia\nO horizonte brilha em neon azul\nSinto a batida guiar meus passos\nSeguindo o asfalto em direção ao sul\n\n(Refrão)\nNeon Horizons vão nos levar\nOnde a noite nunca vai acabar\nSe perca na frequência desse som\nO CS Estúdio dita o tom\n\nViajando através do tempo e espaço\nNa velocidade constante do sintetizador\nEsquecendo de todas as dores do mundo\nVivendo apenas a melodia e o amor.",
+    lyrics: "[00:08.00] Luzes piscam na cidade vazia\n[00:15.50] O horizonte brilha em neon azul\n[00:23.00] Sinto a batida guiar meus passos\n[00:30.50] Seguindo o asfalto em direção ao sul\n\n[00:40.00] (Refrão)\n[00:43.00] Neon Horizons vão nos levar\n[00:51.00] Onde a noite nunca vai acabar\n[00:59.00] Se perca na frequência desse som\n[01:07.00] O CS Estúdio dita o tom\n\n[01:18.00] Viajando através do tempo e espaço\n[01:28.00] Na velocidade constante do sintetizador\n[01:38.00] Esquecendo de todas as dores do mundo\n[01:48.00] Vivendo apenas a melodia e o amor.",
     plays: 1420,
     candidateArtists: [
       { name: "Roberto Carlos", votes: 45, imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face" },
@@ -94,7 +94,7 @@ const DEFAULT_PRELOADS: Song[] = [
     year: 2025,
     coverUrl: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80",
     audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-    lyrics: "Gosto de café morno nas manhãs cinzentas\nA chuva bate leve de leve na janela\nA batida abafada conforta o peito\nLembranças de uma estação amarela\n\n(Instrumental chill)\n\nDeixe o som acalmar seus pensamentos\nO ruído do vinil gira sem parar\nUm gole de inspiração e paciência\nO CS Estúdio ajuda a respirar.",
+    lyrics: "[00:06.00] Gosto de café morno nas manhãs cinzentas\n[00:14.00] A chuva bate leve de leve na janela\n[00:22.00] A batida abafada conforta o peito\n[00:30.00] Lembranças de uma estação amarela\n\n[00:40.00] (Instrumental chill)\n\n[00:52.00] Deixe o som acalmar seus pensamentos\n[01:02.00] O ruído do vinil gira sem parar\n[01:12.00] Um gole de inspiração e paciência\n[01:22.00] O CS Estúdio ajuda a respirar.",
     plays: 980,
     candidateArtists: [
       { name: "Caetano Veloso", votes: 15, imageUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face" },

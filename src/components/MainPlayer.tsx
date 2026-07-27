@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PrizeRoulette } from './PrizeRoulette';
+import { SynchronizedLyrics } from './SynchronizedLyrics';
 
 const MarqueeText: React.FC<{ text: string; className?: string }> = ({ text, className }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -372,7 +373,7 @@ export const MainPlayer: React.FC = () => {
             initial={{ y: 80, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 80, opacity: 0 }}
-            className={`fixed ${isAtBottom ? 'bottom-[55px] md:bottom-[68px]' : 'bottom-[55px] md:bottom-3'} left-0 right-0 md:left-3 md:right-3 z-40 bg-[#121214]/65 backdrop-blur-xl border-t border-b-0 border-x-0 md:border border-[#1F1F22]/50 rounded-none md:rounded-2xl h-16 px-4 py-2 flex items-center justify-between gap-4 shadow-[0_8px_30px_rgba(0,0,0,0.8)] max-w-md md:max-w-2xl lg:max-w-4xl mx-auto cursor-pointer overflow-hidden transition-all duration-300 ease-in-out`}
+            className={`fixed ${isAtBottom ? 'bottom-[58px]' : 'bottom-[58px]'} left-0 right-0 md:left-3 md:right-3 z-40 bg-[#121214]/65 backdrop-blur-xl border-t border-b-0 border-x-0 md:border border-[#1F1F22]/50 rounded-none md:rounded-2xl h-16 px-4 py-2 flex items-center justify-between gap-4 shadow-[0_8px_30px_rgba(0,0,0,0.8)] max-w-md md:max-w-2xl lg:max-w-4xl mx-auto cursor-pointer overflow-hidden transition-all duration-300 ease-in-out`}
             onClick={() => setIsExpanded(true)}
           >
             {/* Ambient dynamic cover art background glow */}
@@ -574,11 +575,13 @@ export const MainPlayer: React.FC = () => {
                 </div>
 
                 {/* Lyrics box scrolling container */}
-                <div className="flex-1 overflow-y-auto bg-[#18181B]/60 border border-[#1F1F22] p-5 rounded-3xl max-h-[300px] md:max-h-none h-full shadow-inner relative">
-                  <p className="text-sm text-neutral-300 whitespace-pre-line leading-relaxed font-sans font-medium text-center italic">
-                    {currentSong.lyrics && currentSong.lyrics !== 'Instrumental' ? currentSong.lyrics : 'Esta é uma faixa instrumental original do CS Estúdio.'}
-                  </p>
-                </div>
+                <SynchronizedLyrics 
+                  lyrics={currentSong.lyrics}
+                  currentTime={currentTime}
+                  duration={duration}
+                  isPlaying={isPlaying}
+                  onSeek={seek}
+                />
               </div>
             </div>
 

@@ -253,7 +253,7 @@ function CSAppContent() {
         <nav 
           id="mobile-nav-stripe" 
           translate="no" 
-          className="fixed bottom-0 left-0 right-0 md:absolute md:bottom-0 bg-black/40 backdrop-blur-xl border-t border-white/5 z-40 px-2 py-2 flex items-center justify-around notranslate h-[56px]"
+          className="fixed bottom-0 left-0 right-0 bg-black/40 backdrop-blur-xl border-t border-white/5 z-40 px-2 py-2 flex items-center justify-around notranslate h-[56px] max-w-md md:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto"
         >
           
           <button 
