@@ -105,8 +105,8 @@ export const ArtistProfile: React.FC = () => {
             </div>
             <div className="w-px h-6 bg-[#1F1F22]" />
             <div className="text-center px-1">
-              <p className="text-[#71717A] text-[9px] uppercase font-heavy tracking-widest">Valor Mínimo</p>
-              <span className="text-[#9D50BB] font-mono text-base font-extrabold">R$ 30,00</span>
+              <p className="text-[#71717A] text-[9px] uppercase font-heavy tracking-widest">Contribuição Voluntária</p>
+              <span className="text-[#9D50BB] font-mono text-base font-extrabold">Valor Mínimo R$ 1,00</span>
             </div>
           </div>
         </div>
