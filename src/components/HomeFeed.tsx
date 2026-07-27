@@ -467,7 +467,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onSelectCategory, activeCate
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={0.2}
               onDragEnd={handleDragEnd}
-              className="grid grid-cols-2 lg:grid-cols-4 gap-4 cursor-grab active:cursor-grabbing select-none touch-pan-y"
+              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5 cursor-grab active:cursor-grabbing select-none touch-pan-y"
             >
               {currentPageSongs.map((song) => {
                 const isCurrent = currentSong?.id === song.id;
@@ -569,7 +569,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onSelectCategory, activeCate
                 <div 
                   key={song.id}
                   onClick={() => handleTrackClick(song)}
-                  className="w-[43%] sm:w-[30%] md:w-[23.5%] lg:w-[23.5%] shrink-0 snap-start snap-always p-3.5 rounded-xl bg-[#18181B] border border-transparent hover:border-[#27272A] hover:bg-[#27272A]/50 transition duration-300 group cursor-pointer flex flex-col justify-between h-full"
+                  className="w-[43%] sm:w-[30%] md:w-[22%] lg:w-[18%] xl:w-[15%] shrink-0 snap-start snap-always p-3.5 rounded-xl bg-[#18181B] border border-transparent hover:border-[#27272A] hover:bg-[#27272A]/50 transition duration-300 group cursor-pointer flex flex-col justify-between h-full"
                 >
                   <div>
                     <div id={`song-artwork-container-${song.id}`} className="relative aspect-square rounded-lg overflow-hidden mb-3 shadow">

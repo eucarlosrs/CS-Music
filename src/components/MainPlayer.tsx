@@ -372,7 +372,7 @@ export const MainPlayer: React.FC = () => {
             initial={{ y: 80, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 80, opacity: 0 }}
-            className={`fixed ${isAtBottom ? 'bottom-[55px] md:bottom-[68px]' : 'bottom-[55px] md:bottom-3'} left-0 right-0 md:left-3 md:right-3 z-40 bg-[#121214]/65 backdrop-blur-xl border-t border-b-0 border-x-0 md:border border-[#1F1F22]/50 rounded-none md:rounded-2xl h-16 px-4 py-2 flex items-center justify-between gap-4 shadow-[0_8px_30px_rgba(0,0,0,0.8)] max-w-md md:max-w-[552px] mx-auto cursor-pointer overflow-hidden transition-all duration-300 ease-in-out`}
+            className={`fixed ${isAtBottom ? 'bottom-[55px] md:bottom-[68px]' : 'bottom-[55px] md:bottom-3'} left-0 right-0 md:left-3 md:right-3 z-40 bg-[#121214]/65 backdrop-blur-xl border-t border-b-0 border-x-0 md:border border-[#1F1F22]/50 rounded-none md:rounded-2xl h-16 px-4 py-2 flex items-center justify-between gap-4 shadow-[0_8px_30px_rgba(0,0,0,0.8)] max-w-md md:max-w-2xl lg:max-w-4xl mx-auto cursor-pointer overflow-hidden transition-all duration-300 ease-in-out`}
             onClick={() => setIsExpanded(true)}
           >
             {/* Ambient dynamic cover art background glow */}
@@ -517,7 +517,7 @@ export const MainPlayer: React.FC = () => {
               <div className={`w-full md:w-1/2 flex flex-col items-center justify-center space-y-3 sm:space-y-6 ${isLyricsExpanded ? 'hidden md:flex' : 'flex'} min-h-0`}>
                 <motion.div 
                   layoutId={`fullscreen-artwork-${currentSong.id}`}
-                  className="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 rounded-3xl overflow-hidden shadow-[0_12px_60px_rgba(0,0,0,0.8)] border border-[#1F1F22] aspect-square shrink-1 min-h-0 max-h-[38vh] relative group"
+                  className="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[420px] lg:h-[420px] rounded-3xl overflow-hidden shadow-[0_12px_60px_rgba(0,0,0,0.8)] border border-[#1F1F22] aspect-square shrink-1 min-h-0 max-h-[38vh] md:max-h-[50vh] relative group"
                 >
                   <img 
                     src={currentSong.coverUrl} 
@@ -533,7 +533,7 @@ export const MainPlayer: React.FC = () => {
                 </motion.div>
 
                 {/* Song and Author details */}
-                <div className="w-full text-center md:text-left flex items-start justify-between gap-4 max-w-sm shrink-0">
+                <div className="w-full text-center md:text-left flex items-start justify-between gap-4 max-w-sm md:max-w-md shrink-0">
                   <div className="text-left w-full min-w-0">
                     <MarqueeText text={currentSong.name} className="text-lg sm:text-xl md:text-2xl font-black text-white font-sans tracking-tight" />
                     <p className="text-xs sm:text-sm text-[#A1A1AA] font-medium truncate mt-0.5">{currentSong.artist}</p>
@@ -950,7 +950,7 @@ export const MainPlayer: React.FC = () => {
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="w-full max-w-md bg-[#0F0F11] border border-[#1F1F22] p-6 rounded-2xl space-y-6 shadow-[0_20px_50px_rgba(0,0,0,0.9)] relative text-left"
+                className="w-full max-w-md md:max-w-xl lg:max-w-2xl bg-[#0F0F11] border border-[#1F1F22] p-6 md:p-8 rounded-2xl md:rounded-3xl space-y-6 shadow-[0_20px_50px_rgba(0,0,0,0.9)] relative text-left"
               >
                 {/* Close Button */}
                 <button

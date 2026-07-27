@@ -164,8 +164,8 @@ function CSAppContent() {
   return (
     <div className="min-h-screen bg-[#050505] text-[#F4F4F5] flex flex-col items-center justify-start antialiased relative font-sans select-none">
       
-      {/* 2. RESPONSIVE COMPACT ENCLOSURE (Aesthetic centered device view on Wide Monitors) */}
-      <div className="w-full max-w-md md:max-w-xl md:border-x md:border-[#1F1F22] min-h-screen bg-[#050505] flex flex-col relative pb-36">
+      {/* 2. RESPONSIVE COMPACT ENCLOSURE (Aesthetic centered device view on Wide/Vertical Monitors) */}
+      <div className="w-full max-w-md md:max-w-3xl lg:max-w-5xl xl:max-w-6xl md:border-x md:border-[#1F1F22] min-h-screen bg-[#050505] flex flex-col relative pb-36">
         
         {/* APP HEADER */}
         <header className="sticky top-0 z-40 bg-[#000000]/80 backdrop-blur-md px-5 py-3 flex items-center justify-between shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
