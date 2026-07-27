@@ -169,7 +169,18 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onSelectCategory, activeCate
   }, [activeCategory]);
   const [popularSlideDirection, setPopularSlideDirection] = useState<'left' | 'right'>('right');
 
-  const popularPageSize = 4;
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const checkDesktop = () => {
+      setIsDesktop(window.innerWidth >= 768);
+    };
+    checkDesktop();
+    window.addEventListener('resize', checkDesktop);
+    return () => window.removeEventListener('resize', checkDesktop);
+  }, []);
+
+  const popularPageSize = isDesktop ? 6 : 4;
   const totalPopularPages = Math.ceil(popularSongs.length / popularPageSize);
 
   // Safely adjust page index if totalPopularPages changes
@@ -467,7 +478,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ onSelectCategory, activeCate
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={0.2}
               onDragEnd={handleDragEnd}
-              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5 cursor-grab active:cursor-grabbing select-none touch-pan-y"
+              className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5 cursor-grab active:cursor-grabbing select-none touch-pan-y"
             >
               {currentPageSongs.map((song) => {
                 const isCurrent = currentSong?.id === song.id;
