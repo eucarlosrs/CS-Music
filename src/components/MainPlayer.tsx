@@ -34,7 +34,6 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PrizeRoulette } from './PrizeRoulette';
-import { SynchronizedLyrics } from './SynchronizedLyrics';
 
 const MarqueeText: React.FC<{ text: string; className?: string }> = ({ text, className }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -575,13 +574,11 @@ export const MainPlayer: React.FC = () => {
                 </div>
 
                 {/* Lyrics box scrolling container */}
-                <SynchronizedLyrics 
-                  lyrics={currentSong.lyrics}
-                  currentTime={currentTime}
-                  duration={duration}
-                  isPlaying={isPlaying}
-                  onSeek={seek}
-                />
+                <div className="flex-1 overflow-y-auto bg-[#18181B]/60 border border-[#1F1F22] p-5 rounded-3xl max-h-[300px] md:max-h-none h-full shadow-inner relative">
+                  <p className="text-sm text-neutral-300 whitespace-pre-line leading-relaxed font-sans font-medium text-center italic">
+                    {currentSong.lyrics && currentSong.lyrics !== 'Instrumental' ? currentSong.lyrics : 'Esta é uma faixa instrumental original do CS Estúdio.'}
+                  </p>
+                </div>
               </div>
             </div>
 
