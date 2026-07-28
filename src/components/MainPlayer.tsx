@@ -511,13 +511,13 @@ export const MainPlayer: React.FC = () => {
             </div>
 
             {/* BODY CANVAS VIEW (Split: Song detail / Scroll lyrics) */}
-            <div className="relative flex-1 flex flex-col md:flex-row items-center md:portrait:items-stretch justify-center p-4 sm:p-6 md:p-12 portrait:p-6 md:portrait:p-8 gap-4 sm:gap-8 portrait:gap-6 md:portrait:gap-8 z-20 max-w-5xl mx-auto w-full min-h-0 overflow-hidden">
+            <div className="relative flex-1 flex flex-col md:flex-row items-center md:portrait:items-stretch justify-center p-4 sm:p-6 md:p-6 lg:p-8 portrait:p-6 md:portrait:p-8 gap-4 sm:gap-6 md:gap-8 portrait:gap-6 md:portrait:gap-8 z-20 max-w-5xl lg:max-w-6xl mx-auto w-full min-h-0 overflow-hidden">
               
               {/* Left Column: Visual Artwork panel (Visible unless lyrics take full screen on mobile) */}
-              <div className={`w-full md:w-1/2 flex flex-col items-center justify-center space-y-3 sm:space-y-6 ${isLyricsExpanded ? 'hidden md:flex' : 'flex'} min-h-0 md:portrait:self-center`}>
+              <div className={`w-full md:w-1/2 flex flex-col items-center justify-center space-y-2 sm:space-y-4 md:landscape:space-y-3 ${isLyricsExpanded ? 'hidden md:flex' : 'flex'} min-h-0 md:portrait:self-center`}>
                 <motion.div 
                   layoutId={`fullscreen-artwork-${currentSong.id}`}
-                  className="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[420px] lg:h-[420px] rounded-3xl overflow-hidden shadow-[0_12px_60px_rgba(0,0,0,0.8)] border border-[#1F1F22] aspect-square shrink-1 min-h-0 max-h-[38vh] md:max-h-[50vh] portrait:max-h-[35vh] md:portrait:max-h-[48vh] relative group"
+                  className="w-56 h-56 sm:w-72 sm:h-72 md:w-80 md:h-80 lg:w-[380px] lg:h-[380px] md:landscape:w-[260px] md:landscape:h-[260px] lg:landscape:w-[300px] lg:landscape:h-[300px] md:portrait:w-96 md:portrait:h-96 lg:portrait:w-[420px] lg:portrait:h-[420px] rounded-3xl overflow-hidden shadow-[0_12px_60px_rgba(0,0,0,0.8)] border border-[#1F1F22] aspect-square shrink-1 min-h-0 max-h-[30vh] sm:max-h-[36vh] md:landscape:max-h-[35vh] md:portrait:max-h-[48vh] relative group"
                 >
                   <img 
                     src={currentSong.coverUrl} 
@@ -533,34 +533,34 @@ export const MainPlayer: React.FC = () => {
                 </motion.div>
 
                 {/* Song and Author details */}
-                <div className="w-full text-center md:text-left flex items-start justify-between gap-4 max-w-sm md:max-w-md shrink-0">
+                <div className="w-full text-center md:text-left flex items-center justify-between gap-3 max-w-sm md:max-w-md md:landscape:max-w-[280px] lg:landscape:max-w-[320px] shrink-0">
                   <div className="text-left w-full min-w-0">
-                    <MarqueeText text={currentSong.name} className="text-lg sm:text-xl md:text-2xl font-black text-white font-sans tracking-tight" />
+                    <MarqueeText text={currentSong.name} className="text-base sm:text-lg md:text-xl md:portrait:text-2xl font-black text-white font-sans tracking-tight" />
                     <p className="text-xs sm:text-sm text-[#A1A1AA] font-medium truncate mt-0.5">{currentSong.artist}</p>
                   </div>
                   <div className="flex gap-2 shrink-0">
                     <button 
                       id="fullscreen-favorite-btn"
                       onClick={() => toggleLikeSong(currentSong.id)}
-                      className={`p-2 sm:p-3 rounded-xl hover:bg-[#18181B] border border-[#27272A] transition ${isLiked ? 'text-pink-500 border-pink-500/20 bg-pink-500/5' : 'text-[#71717A] hover:text-white'}`}
+                      className={`p-2 sm:p-2.5 rounded-xl hover:bg-[#18181B] border border-[#27272A] transition ${isLiked ? 'text-pink-500 border-pink-500/20 bg-pink-500/5' : 'text-[#71717A] hover:text-white'}`}
                     >
-                      <Heart className={`w-4 sm:w-5 h-4 sm:h-5 ${isLiked ? 'fill-pink-500' : ''}`} />
+                      <Heart className={`w-4 sm:w-4.5 h-4 sm:h-4.5 ${isLiked ? 'fill-pink-500' : ''}`} />
                     </button>
                     <button 
                       id="fullscreen-add-playlist-btn"
                       onClick={() => setShowAddPlaylistModal(true)}
-                      className="p-2 sm:p-3 rounded-xl hover:bg-[#18181B] border border-[#27272A] text-[#71717A] hover:text-[#9D50BB] hover:border-[#9D50BB]/30 transition cursor-pointer"
+                      className="p-2 sm:p-2.5 rounded-xl hover:bg-[#18181B] border border-[#27272A] text-[#71717A] hover:text-[#9D50BB] hover:border-[#9D50BB]/30 transition cursor-pointer"
                       title="Salvar na playlist"
                     >
-                      <Plus className="w-4 sm:w-5 h-4 sm:h-5" />
+                      <Plus className="w-4 sm:w-4.5 h-4 sm:h-4.5" />
                     </button>
                   </div>
                 </div>
               </div>
 
               {/* Right Column: Lyrics Scroller, or responsive sidebar spacing */}
-              <div className={`w-full md:w-1/2 flex flex-col ${isLyricsExpanded ? 'flex flex-1 h-full' : 'hidden md:flex h-96 portrait:h-80 md:portrait:h-full md:portrait:max-h-full'} min-h-0`}>
-                <div className="flex items-center justify-between mb-3 shrink-0">
+              <div className={`w-full md:w-1/2 flex flex-col ${isLyricsExpanded ? 'flex flex-1 h-full' : 'hidden md:flex h-64 md:h-72 lg:h-80 md:landscape:h-[300px] lg:landscape:h-[340px] portrait:h-80 md:portrait:h-full md:portrait:max-h-full'} min-h-0`}>
+                <div className="flex items-center justify-between mb-2.5 shrink-0">
                   <span className="text-xs font-bold uppercase tracking-wider text-[#71717A] flex items-center gap-1">
                     <FileText className="w-3.5 h-3.5" /> Letra da música
                   </span>
@@ -574,7 +574,7 @@ export const MainPlayer: React.FC = () => {
                 </div>
 
                 {/* Lyrics box scrolling container */}
-                <div className="flex-1 overflow-y-auto bg-[#18181B]/60 border border-[#1F1F22] p-5 rounded-3xl max-h-[300px] md:max-h-none h-full shadow-inner relative">
+                <div className="flex-1 overflow-y-auto bg-[#18181B]/60 border border-[#1F1F22] p-4 md:p-5 rounded-3xl max-h-[220px] md:max-h-none h-full shadow-inner relative custom-scrollbar">
                   <p className="text-sm text-neutral-300 whitespace-pre-line leading-relaxed font-sans font-medium text-center italic">
                     {currentSong.lyrics && currentSong.lyrics !== 'Instrumental' ? currentSong.lyrics : 'Esta é uma faixa instrumental original do CS Estúdio.'}
                   </p>
@@ -583,9 +583,9 @@ export const MainPlayer: React.FC = () => {
             </div>
 
             {/* CONTROLS BOX SECTION AT BOTTOM (Seeking, Timelines, Player triggers) */}
-            <div className="relative p-4 sm:p-6 md:p-8 portrait:p-5 md:portrait:p-7 space-y-4 sm:space-y-6 portrait:space-y-3 md:portrait:space-y-5 bg-black/65 backdrop-blur-md border-t border-[#1F1F22]/40 z-10 w-full shrink-0">
+            <div className="relative p-4 sm:p-6 md:p-6 portrait:p-5 md:portrait:p-7 space-y-3 sm:space-y-4 portrait:space-y-3 md:portrait:space-y-5 bg-black/65 backdrop-blur-md border-t border-[#1F1F22]/40 z-10 w-full shrink-0">
               {/* Smooth Glowing Bottom Wave Visualizer (Pulsing neon waveform sitting behind text, translucent and shifted slightly down) */}
-              <div className="absolute left-0 right-0 bottom-[calc(100%-16px)] md:bottom-[calc(100%-10px)] pointer-events-none z-0 h-[120px] sm:h-[195px] md:h-[260px] portrait:h-[140px] md:portrait:h-[220px] overflow-hidden opacity-35 md:opacity-45 select-none">
+              <div className="absolute left-0 right-0 bottom-[calc(100%-16px)] md:bottom-[calc(100%-10px)] pointer-events-none z-0 h-[100px] sm:h-[150px] md:h-[180px] md:landscape:h-[120px] portrait:h-[140px] md:portrait:h-[220px] overflow-hidden opacity-35 md:opacity-45 select-none">
                 <AudioWaveVisualizer isPlaying={isPlaying} />
               </div>
               <div className="max-w-xl md:portrait:max-w-3xl lg:portrait:max-w-4xl mx-auto space-y-3 sm:space-y-4">
