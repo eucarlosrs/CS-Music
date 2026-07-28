@@ -588,7 +588,7 @@ export const MainPlayer: React.FC = () => {
               <div className="absolute left-0 right-0 bottom-[calc(100%-16px)] md:bottom-[calc(100%-10px)] pointer-events-none z-0 h-[120px] sm:h-[195px] md:h-[260px] portrait:h-[140px] md:portrait:h-[220px] overflow-hidden opacity-35 md:opacity-45 select-none">
                 <AudioWaveVisualizer isPlaying={isPlaying} />
               </div>
-              <div className="max-w-xl mx-auto space-y-3 sm:space-y-4">
+              <div className="max-w-xl md:portrait:max-w-3xl lg:portrait:max-w-4xl mx-auto space-y-3 sm:space-y-4">
                 
                 {/* Micro timing timeline slider */}
                 <div className="space-y-1">
