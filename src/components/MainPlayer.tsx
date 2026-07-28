@@ -103,15 +103,15 @@ const CandidateAvatar: React.FC<{ imageUrl?: string; name: string }> = ({ imageU
         src={imageUrl}
         alt={name}
         onError={() => setHasError(true)}
-        className="w-9 h-9 rounded-full object-cover border border-[#27272A] shrink-0 shadow-md"
+        className="w-9 h-9 md:portrait:w-11 md:portrait:h-11 rounded-full object-cover border border-[#27272A] shrink-0 shadow-md"
         referrerPolicy="no-referrer"
       />
     );
   }
 
   return (
-    <div className="w-9 h-9 rounded-full bg-neutral-800 border border-[#27272A] flex items-center justify-center shrink-0 shadow-md">
-      <span className="text-[10px] font-bold text-neutral-400">
+    <div className="w-9 h-9 md:portrait:w-11 md:portrait:h-11 rounded-full bg-neutral-800 border border-[#27272A] flex items-center justify-center shrink-0 shadow-md">
+      <span className="text-[10px] md:portrait:text-xs font-bold text-neutral-400">
         {getInitials(name)}
       </span>
     </div>
@@ -950,7 +950,7 @@ export const MainPlayer: React.FC = () => {
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="w-full max-w-md md:max-w-xl lg:max-w-2xl bg-[#0F0F11] border border-[#1F1F22] p-6 md:p-8 rounded-2xl md:rounded-3xl space-y-6 shadow-[0_20px_50px_rgba(0,0,0,0.9)] relative text-left"
+                className="w-full max-w-md md:max-w-xl lg:max-w-2xl md:portrait:max-w-2xl lg:portrait:max-w-3xl bg-[#0F0F11] border border-[#1F1F22] p-6 md:p-8 md:portrait:p-10 rounded-2xl md:rounded-3xl space-y-6 md:portrait:space-y-8 shadow-[0_20px_50px_rgba(0,0,0,0.9)] relative text-left"
               >
                 {/* Close Button */}
                 <button
@@ -958,35 +958,35 @@ export const MainPlayer: React.FC = () => {
                   onClick={() => setShowVotingModal(false)}
                   className="absolute top-4 right-4 p-2 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white transition cursor-pointer"
                 >
-                  <X className="w-4.5 h-4.5" />
+                  <X className="w-4.5 h-4.5 md:portrait:w-5 md:portrait:h-5" />
                 </button>
 
                 <>
                   {/* Title & Description */}
-                  <div className="space-y-1.5 pr-8 font-sans">
-                    <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#00E5FF]/10 text-[#00E5FF] border border-[#00E5FF]/20 text-[9px] font-bold uppercase tracking-wider">
-                      <Sparkles className="w-3 h-3 text-[#00E5FF] animate-pulse" /> Votação Popular
+                  <div className="space-y-1.5 md:portrait:space-y-2 pr-8 font-sans">
+                    <div className="inline-flex items-center gap-1.5 px-2 py-0.5 md:portrait:px-3 md:portrait:py-1 rounded-full bg-[#00E5FF]/10 text-[#00E5FF] border border-[#00E5FF]/20 text-[9px] md:portrait:text-xs font-bold uppercase tracking-wider">
+                      <Sparkles className="w-3 h-3 md:portrait:w-3.5 md:portrait:h-3.5 text-[#00E5FF] animate-pulse" /> Votação Popular
                     </div>
-                    <h3 className="text-base font-black text-white font-sans tracking-tight">
+                    <h3 className="text-base md:portrait:text-2xl font-black text-white font-sans tracking-tight">
                       Na Voz Desse Artista Vira Hit?
                     </h3>
-                    <p className="text-xs text-[#A1A1AA] leading-relaxed font-medium">
+                    <p className="text-xs md:portrait:text-sm text-[#A1A1AA] leading-relaxed font-medium">
                       Selecione qual artista ficaria melhor interpretando esta obra e dê o seu voto para virar um grande sucesso!
                     </p>
                   </div>
 
                   {/* Current Song Card Context */}
                   {currentSong ? (
-                    <div className="flex items-center gap-3 bg-[#161619] border border-[#1F1F22] p-3 rounded-xl font-sans">
+                    <div className="flex items-center gap-3 md:portrait:gap-4 bg-[#161619] border border-[#1F1F22] p-3 md:portrait:p-4 rounded-xl font-sans">
                       <img
                         src={currentSong.coverUrl}
                         alt={currentSong.name}
-                        className="w-12 h-12 rounded-lg object-cover border border-[#27272A]"
+                        className="w-12 h-12 md:portrait:w-16 md:portrait:h-16 rounded-lg object-cover border border-[#27272A]"
                         referrerPolicy="no-referrer"
                       />
                       <div className="min-w-0 flex-1">
-                        <p className="text-xs font-bold text-white truncate">{currentSong.name}</p>
-                        <p className="text-[10px] text-[#A1A1AA] truncate mt-0.5">{currentSong.artist}</p>
+                        <p className="text-xs md:portrait:text-sm font-bold text-white truncate">{currentSong.name}</p>
+                        <p className="text-[10px] md:portrait:text-xs text-[#A1A1AA] truncate mt-0.5">{currentSong.artist}</p>
                       </div>
                     </div>
                   ) : (
@@ -997,7 +997,7 @@ export const MainPlayer: React.FC = () => {
 
                   {/* Candidate Artists List */}
                   {currentSong && (
-                    <div className="space-y-2.5 font-sans">
+                    <div className="space-y-2.5 md:portrait:space-y-3.5 font-sans">
                       {(!currentSong.candidateArtists || currentSong.candidateArtists.length === 0) ? (
                         <div className="text-center p-6 border border-dashed border-[#1F1F22] rounded-xl text-xs text-[#71717A] font-sans">
                           Nenhum artista foi cadastrado para votação nesta música.
@@ -1010,24 +1010,24 @@ export const MainPlayer: React.FC = () => {
                           return (
                             <div
                               key={idx}
-                              className={`flex items-center justify-between p-3.5 rounded-xl border transition-all duration-300 ${
+                              className={`flex items-center justify-between p-3.5 md:portrait:p-4.5 rounded-xl border transition-all duration-300 ${
                                 hasVotedThis
                                   ? 'bg-[#00E5FF]/10 border-[#00E5FF]/40 shadow-[0_0_12px_rgba(0,229,255,0.15)]'
                                   : 'bg-[#141417] border-[#1F1F22] hover:border-[#27272A]'
                               }`}
                             >
-                              <div className="min-w-0 pr-3 flex items-center gap-3">
-                                <span className="w-5 h-5 rounded-md bg-neutral-900 text-[10px] font-black text-[#A1A1AA] flex items-center justify-center border border-[#1F1F22] shrink-0">
+                              <div className="min-w-0 pr-3 flex items-center gap-3 md:portrait:gap-4">
+                                <span className="w-5 h-5 md:portrait:w-6 md:portrait:h-6 rounded-md bg-neutral-900 text-[10px] md:portrait:text-xs font-black text-[#A1A1AA] flex items-center justify-center border border-[#1F1F22] shrink-0">
                                   {idx + 1}
                                 </span>
 
                                 <CandidateAvatar imageUrl={candidate.imageUrl} name={candidate.name} />
 
                                 <div className="min-w-0">
-                                  <p className="text-xs font-bold text-white truncate">{candidate.name}</p>
+                                  <p className="text-xs md:portrait:text-sm lg:portrait:text-base font-bold text-white truncate">{candidate.name}</p>
                                   <div className="flex items-center gap-1.5 mt-0.5">
-                                    <TrendingUp className="w-3 h-3 text-[#71717A]" />
-                                    <span className="text-[10px] text-[#A1A1AA] font-semibold">
+                                    <TrendingUp className="w-3 h-3 md:portrait:w-3.5 md:portrait:h-3.5 text-[#71717A]" />
+                                    <span className="text-[10px] md:portrait:text-xs text-[#A1A1AA] font-semibold">
                                       {candidate.votes || 0} {candidate.votes === 1 ? 'voto' : 'votos'}
                                     </span>
                                   </div>
@@ -1038,7 +1038,7 @@ export const MainPlayer: React.FC = () => {
                                 type="button"
                                 disabled={hasVotedAny}
                                 onClick={() => handleVote(candidate.name)}
-                                className={`px-4 py-1.5 rounded-xl text-[10px] font-bold transition-all duration-300 flex items-center gap-1 cursor-pointer ${
+                                className={`px-4 py-1.5 md:portrait:px-5 md:portrait:py-2.5 rounded-xl text-[10px] md:portrait:text-xs font-bold transition-all duration-300 flex items-center gap-1 cursor-pointer ${
                                   hasVotedThis
                                     ? 'bg-emerald-500/15 border border-emerald-500/20 text-emerald-400 cursor-default'
                                     : hasVotedAny
@@ -1048,7 +1048,7 @@ export const MainPlayer: React.FC = () => {
                               >
                                 {hasVotedThis ? (
                                   <>
-                                    <Check className="w-3 h-3 stroke-[3px]" />
+                                    <Check className="w-3 h-3 md:portrait:w-3.5 md:portrait:h-3.5 stroke-[3px]" />
                                     <span>Votado!</span>
                                   </>
                                 ) : (
@@ -1064,7 +1064,7 @@ export const MainPlayer: React.FC = () => {
 
                   {/* Bottom Information */}
                   <div className="text-center font-sans">
-                    <p className="text-[9px] text-[#71717A] font-semibold uppercase tracking-wider">
+                    <p className="text-[9px] md:portrait:text-xs text-[#71717A] font-semibold uppercase tracking-wider">
                       CS Music Votos Seguros • Licenciado em tempo real
                     </p>
                   </div>
