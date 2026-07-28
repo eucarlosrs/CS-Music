@@ -164,8 +164,8 @@ function CSAppContent() {
   return (
     <div className="min-h-screen bg-[#050505] text-[#F4F4F5] flex flex-col items-center justify-start antialiased relative font-sans select-none">
       
-      {/* 2. RESPONSIVE COMPACT ENCLOSURE (Aesthetic centered device view on Wide/Vertical Monitors) */}
-      <div className="w-full max-w-md md:max-w-3xl lg:max-w-5xl xl:max-w-6xl md:border-x md:border-[#1F1F22] min-h-screen bg-[#050505] flex flex-col relative pb-36">
+      {/* 2. RESPONSIVE FULL-WIDTH CONTAINER FOR DESKTOP AND MOBILE */}
+      <div className="w-full min-h-screen bg-[#050505] flex flex-col relative pb-36">
         
         {/* APP HEADER */}
         <header className="sticky top-0 z-40 bg-[#000000]/80 backdrop-blur-md px-5 py-3 flex items-center justify-between shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
@@ -253,7 +253,7 @@ function CSAppContent() {
         <nav 
           id="mobile-nav-stripe" 
           translate="no" 
-          className="fixed bottom-0 left-0 right-0 bg-black/40 backdrop-blur-xl border-t border-white/5 z-40 px-2 py-2 flex items-center justify-around notranslate h-[56px] max-w-md md:max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto"
+          className="fixed bottom-0 left-0 right-0 bg-black/40 backdrop-blur-xl border-t border-white/5 z-40 px-2 py-2 flex items-center justify-around notranslate h-[56px] w-full mx-auto"
         >
           
           <button 

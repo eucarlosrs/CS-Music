@@ -372,7 +372,7 @@ export const MainPlayer: React.FC = () => {
             initial={{ y: 80, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 80, opacity: 0 }}
-            className={`fixed ${isAtBottom ? 'bottom-[58px]' : 'bottom-[58px]'} left-0 right-0 md:left-3 md:right-3 z-40 bg-[#121214]/65 backdrop-blur-xl border-t border-b-0 border-x-0 md:border border-[#1F1F22]/50 rounded-none md:rounded-2xl h-16 px-4 py-2 flex items-center justify-between gap-4 shadow-[0_8px_30px_rgba(0,0,0,0.8)] max-w-md md:max-w-2xl lg:max-w-4xl mx-auto cursor-pointer overflow-hidden transition-all duration-300 ease-in-out`}
+            className={`fixed ${isAtBottom ? 'bottom-[58px]' : 'bottom-[58px]'} left-0 right-0 md:left-3 md:right-3 z-40 bg-[#121214]/65 backdrop-blur-xl border-t border-b-0 border-x-0 md:border border-[#1F1F22]/50 rounded-none md:rounded-2xl h-16 px-4 py-2 flex items-center justify-between gap-4 shadow-[0_8px_30px_rgba(0,0,0,0.8)] w-full max-w-full mx-auto cursor-pointer overflow-hidden transition-all duration-300 ease-in-out`}
             onClick={() => setIsExpanded(true)}
           >
             {/* Ambient dynamic cover art background glow */}
