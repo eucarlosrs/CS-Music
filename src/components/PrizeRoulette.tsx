@@ -525,14 +525,14 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
             className="w-full max-w-lg md:max-w-2xl lg:max-w-3xl flex flex-col items-center justify-between h-full max-h-[92vh] py-6 relative"
           >
             {/* Header / Logo */}
-            <div className="text-center space-y-1 z-10">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00E5FF]/10 text-[#00E5FF] border border-[#00E5FF]/20 text-[10px] md:text-xs font-black uppercase tracking-widest animate-pulse">
+            <div className="text-center space-y-1 z-10 md:portrait:space-y-2">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00E5FF]/10 text-[#00E5FF] border border-[#00E5FF]/20 text-[10px] md:text-xs md:portrait:text-sm font-black uppercase tracking-widest animate-pulse">
                 <Sparkles className="w-3.5 h-3.5 text-[#00E5FF]" /> Roleta da Sorte CS Music
               </div>
-              <h2 className="text-xl md:text-3xl font-black font-sans tracking-tight bg-gradient-to-r from-white via-neutral-100 to-[#00E5FF] bg-clip-text text-transparent">
+              <h2 className="text-xl md:text-3xl md:portrait:text-4xl font-black font-sans tracking-tight bg-gradient-to-r from-white via-neutral-100 to-[#00E5FF] bg-clip-text text-transparent">
                 Gire e Ganhe Prêmios!
               </h2>
-              <p className="text-[10px] md:text-xs text-neutral-400 font-bold">
+              <p className="text-[10px] md:text-xs md:portrait:text-sm text-neutral-400 font-bold">
                 Você votou em <span className="text-[#00E5FF] font-black">{votedArtist?.name || 'seu artista preferido'}</span>. Agora, teste sua sorte!
               </p>
             </div>
@@ -548,7 +548,7 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
             )}
 
             {/* --- THE WHEEL AREA --- */}
-            <div className="relative my-auto flex flex-col items-center justify-center w-[340px] h-[340px] md:w-[440px] md:h-[440px] lg:w-[500px] lg:h-[500px]">
+            <div className="relative my-auto flex flex-col items-center justify-center w-[340px] h-[340px] md:w-[440px] md:h-[440px] lg:w-[500px] lg:h-[500px] md:portrait:w-[520px] md:portrait:h-[520px] lg:portrait:w-[580px] lg:portrait:h-[580px]">
               {/* Outer glowing border ring */}
               <div className="absolute inset-0 rounded-full border-4 border-[#1F1F22] bg-[#050505] shadow-[0_0_60px_rgba(0,E5,FF,0.15)] pointer-events-none" />
               <div className="absolute inset-4 rounded-full border border-[#27272A] pointer-events-none" />
@@ -561,7 +561,7 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
 
               {/* Rotating Wheel Container */}
               <motion.div
-                className="w-[280px] h-[280px] md:w-[380px] md:h-[380px] lg:w-[440px] lg:h-[440px] z-10 rounded-full overflow-hidden"
+                className="w-[280px] h-[280px] md:w-[380px] md:h-[380px] lg:w-[440px] lg:h-[440px] md:portrait:w-[450px] md:portrait:h-[450px] lg:portrait:w-[510px] lg:portrait:h-[510px] z-10 rounded-full overflow-hidden"
                 style={{ originX: 0.5, originY: 0.5 }}
                 animate={{ rotate: rotation }}
                 transition={isSpinning ? { duration: 22, ease: [0.25, 1, 0.5, 1] } : { duration: 0 }}
@@ -679,7 +679,7 @@ export const PrizeRoulette: React.FC<PrizeRouletteProps> = ({ votedArtist, onClo
                 type="button"
                 disabled={isSpinning || isWaitingDelay || (winningSector !== null && !canSpinAgain)}
                 onClick={spinWheel}
-                className={`w-full max-w-xs py-3.5 px-6 rounded-2xl text-xs font-extrabold uppercase tracking-widest text-black flex items-center justify-center gap-2 active:scale-95 transition-all duration-300 shadow-xl cursor-pointer ${
+                className={`w-full max-w-xs md:portrait:max-w-md py-3.5 md:portrait:py-4 px-6 rounded-2xl text-xs md:portrait:text-sm font-extrabold uppercase tracking-widest text-black flex items-center justify-center gap-2 active:scale-95 transition-all duration-300 shadow-xl cursor-pointer ${
                   isSpinning || isWaitingDelay
                     ? 'bg-neutral-800 text-neutral-500 cursor-not-allowed border border-neutral-700/50 shadow-none'
                     : winningSector !== null && !canSpinAgain
