@@ -511,10 +511,10 @@ export const MainPlayer: React.FC = () => {
             </div>
 
             {/* BODY CANVAS VIEW (Split: Song detail / Scroll lyrics) */}
-            <div className="relative flex-1 flex flex-col md:flex-row items-center justify-center p-4 sm:p-6 md:p-12 portrait:p-6 md:portrait:p-10 gap-4 sm:gap-8 portrait:gap-6 md:portrait:gap-8 z-20 max-w-5xl mx-auto w-full min-h-0 overflow-hidden">
+            <div className="relative flex-1 flex flex-col md:flex-row items-center md:portrait:items-stretch justify-center p-4 sm:p-6 md:p-12 portrait:p-6 md:portrait:p-8 gap-4 sm:gap-8 portrait:gap-6 md:portrait:gap-8 z-20 max-w-5xl mx-auto w-full min-h-0 overflow-hidden">
               
               {/* Left Column: Visual Artwork panel (Visible unless lyrics take full screen on mobile) */}
-              <div className={`w-full md:w-1/2 flex flex-col items-center justify-center space-y-3 sm:space-y-6 ${isLyricsExpanded ? 'hidden md:flex' : 'flex'} min-h-0`}>
+              <div className={`w-full md:w-1/2 flex flex-col items-center justify-center space-y-3 sm:space-y-6 ${isLyricsExpanded ? 'hidden md:flex' : 'flex'} min-h-0 md:portrait:self-center`}>
                 <motion.div 
                   layoutId={`fullscreen-artwork-${currentSong.id}`}
                   className="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[420px] lg:h-[420px] rounded-3xl overflow-hidden shadow-[0_12px_60px_rgba(0,0,0,0.8)] border border-[#1F1F22] aspect-square shrink-1 min-h-0 max-h-[38vh] md:max-h-[50vh] portrait:max-h-[35vh] md:portrait:max-h-[48vh] relative group"
@@ -559,7 +559,7 @@ export const MainPlayer: React.FC = () => {
               </div>
 
               {/* Right Column: Lyrics Scroller, or responsive sidebar spacing */}
-              <div className={`w-full md:w-1/2 flex flex-col ${isLyricsExpanded ? 'flex flex-1 h-full' : 'hidden md:flex h-96 portrait:h-80 md:portrait:h-[420px] lg:portrait:h-[480px]'} min-h-0`}>
+              <div className={`w-full md:w-1/2 flex flex-col ${isLyricsExpanded ? 'flex flex-1 h-full' : 'hidden md:flex h-96 portrait:h-80 md:portrait:h-full md:portrait:max-h-full'} min-h-0`}>
                 <div className="flex items-center justify-between mb-3 shrink-0">
                   <span className="text-xs font-bold uppercase tracking-wider text-[#71717A] flex items-center gap-1">
                     <FileText className="w-3.5 h-3.5" /> Letra da música
