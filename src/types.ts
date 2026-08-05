@@ -1,3 +1,4 @@
+// Teste de commit GitHub
 export interface CandidateArtist {
   name: string;
   votes: number;
